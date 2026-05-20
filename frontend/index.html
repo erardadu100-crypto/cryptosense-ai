@@ -734,70 +734,95 @@ async function analyzeContract(){
 
 // ========== TRENDING ==========
 async function renderTrending(){
-  document.getElementById('mainContent').innerHTML=
-    '<div class="page-header"><div><div class="page-title">🔥 <span>Trending</span></div>'+
-    '<div style="font-size:11px;color:var(--muted);margin-top:4px">CoinGecko + DexScreener trending signals</div></div></div>'+
-    '<div class="realtime-bar"><div class="realtime-dot"></div>LIVE TRENDING<span class="last-update" id="lastUpdate">Loading...</span></div>'+
-    '<div id="trendContent"><div class="loading"><div class="spinner"></div></div></div>';
-  await loadTrending();
+  document.getElementById('mainContent').innerHTML=`
+    <div class="page-header">
+      <div><div class="page-title">🔥 <span>Trending</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">DexScreener + CoinGecko + Market Cap</div></div>
+    </div>
+    <div class="realtime-bar"><div class="realtime-dot"></div>LIVE TRENDING<span class="last-update" id="lastUpdate">Loading...</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="btn btn-primary btn-sm" onclick="loadTrendingTab('dex')" id="tab-dex">🔥 DexScreener</button>
+      <button class="btn btn-outline btn-sm" onclick="loadTrendingTab('coingecko')" id="tab-coingecko">📱 CoinGecko</button>
+      <button class="btn btn-outline btn-sm" onclick="loadTrendingTab('market')" id="tab-market">🏆 Market Cap</button>
+    </div>
+    <div id="trendContent"><div class="loading"><div class="spinner"></div></div></div>`;
+  await loadTrendingTab('dex');
   stopTimer();
-  pageTimer=setInterval(()=>{if(currentPage==='trending')loadTrending();},120000);
+  pageTimer=setInterval(()=>{if(currentPage==='trending')loadTrendingTab(currentTrendTab);},120000);
 }
 
-async function loadTrending(){
-  const [socialRes,topRes,trendRes]=await Promise.all([
-    fetch(API+'/api/social').then(r=>r.json()).catch(()=>({posts:[]})),
-    fetch(API+'/api/top-tokens').then(r=>r.json()).catch(()=>({tokens:[]})),
-    fetch(API+'/api/trending').then(r=>r.json()).catch(()=>({trending:[]})),
-  ]);
-  const el=document.getElementById('trendContent');if(!el)return;
+let currentTrendTab='dex';
 
-  const trending=trendRes.trending||[];
+async function loadTrendingTab(tab){
+  currentTrendTab=tab;
+  document.querySelectorAll('[id^="tab-"]').forEach(b=>b.className='btn btn-outline btn-sm');
+  document.getElementById('tab-'+tab).className='btn btn-primary btn-sm';
+
+  const el=document.getElementById('trendContent');if(!el)return;
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
+
   const chainIcon={solana:'🟣',bsc:'🟡',ethereum:'⟠',base:'🔵',arbitrum:'🔷',polygon:'🟣'};
 
-  el.innerHTML=
-    '<div class="card" style="margin-bottom:20px">'+
-    '<div class="card-header"><div class="card-title">🔥 DexScreener Boosted Tokens</div><span style="font-size:10px;color:var(--green)">LIVE</span></div>'+
+  if(tab==='dex'){
+    const d=await fetch(API+'/api/trending').then(r=>r.json()).catch(()=>({trending:[]}));
+    const trending=d.trending||[];
+    if(!trending.length){el.innerHTML='<div class="card" style="padding:30px;text-align:center;color:var(--muted)">No trending data.</div>';return;}
+    el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">🔥 DexScreener Boosted Tokens</div><span style="font-size:10px;color:var(--green)">LIVE</span></div>'+
     trending.map((t,i)=>{
-      const chain=t.chainId||'solana';
-      const icon=chainIcon[chain]||'🔗';
-      const desc=(t.description||'').slice(0,80);
+      const chain=t.chainId||'solana',icon=chainIcon[chain]||'🔗',desc=(t.description||'').slice(0,100);
+      const twitter=t.links?.find(l=>l.type==='twitter');
+      const telegram=t.links?.find(l=>l.type==='telegram');
       return'<div class="social-item" onclick="window.open(\''+t.url+'\',\'_blank\')">'+
-      '<div style="display:flex;align-items:center;gap:10px">'+
-      '<div style="font-size:11px;color:var(--dim);width:20px">'+(i+1)+'</div>'+
-      '<div>'+
-      '<div style="font-size:12px;font-weight:600;color:var(--accent)">'+icon+' '+(t.tokenAddress||'').slice(0,8)+'...</div>'+
-      '<div style="font-size:10px;color:var(--text);margin-top:2px">'+desc+(desc.length>=80?'...':'')+'</div>'+
-      '<div style="display:flex;gap:8px;margin-top:4px">'+
-      '<span style="font-size:9px;background:rgba(0,255,136,.1);color:var(--green);padding:2px 6px;border-radius:4px">'+chain.toUpperCase()+'</span>'+
-      '<span style="font-size:9px;color:var(--yellow)">🔥 Boost: '+t.totalAmount+'</span>'+
-      (t.links&&t.links.find(l=>l.type==='twitter')?'<a href="'+t.links.find(l=>l.type==='twitter').url+'" target="_blank" style="font-size:9px;color:#1da1f2;text-decoration:none">𝕏 Twitter</a>':'')+
-      (t.links&&t.links.find(l=>l.type==='telegram')?'<a href="'+t.links.find(l=>l.type==='telegram').url+'" target="_blank" style="font-size:9px;color:var(--accent);text-decoration:none">✈️ TG</a>':'')+
-      '</div></div></div></div>'
-    }).join('')+'</div>'+
+      '<div style="display:flex;align-items:flex-start;gap:10px">'+
+      '<div style="font-size:12px;color:var(--dim);width:24px;margin-top:2px">'+(i+1)+'</div>'+
+      '<div style="flex:1">'+
+      '<div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px">'+icon+' '+chain.toUpperCase()+' — '+(t.tokenAddress||'').slice(0,10)+'...</div>'+
+      '<div style="font-size:11px;color:var(--text);margin-bottom:6px">'+desc+(desc.length>=100?'...':'')+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+      '<span style="font-size:9px;background:rgba(255,184,0,.1);color:var(--yellow);padding:2px 8px;border-radius:4px">🔥 Boost: '+t.totalAmount+'</span>'+
+      (twitter?'<a href="'+twitter.url+'" target="_blank" onclick="event.stopPropagation()" style="font-size:9px;color:#1da1f2;padding:2px 8px;border:1px solid rgba(29,161,242,.3);border-radius:4px;text-decoration:none">𝕏 Twitter</a>':'')+
+      (telegram?'<a href="'+telegram.url+'" target="_blank" onclick="event.stopPropagation()" style="font-size:9px;color:var(--accent);padding:2px 8px;border:1px solid rgba(0,212,255,.3);border-radius:4px;text-decoration:none">✈️ Telegram</a>':'')+
+      '</div></div></div></div>';
+    }).join('')+'</div>';
 
-    '<div class="grid-2">'+
-    '<div class="card"><div class="card-header"><div class="card-title">📱 CoinGecko Trending</div></div>'+
-    (socialRes.posts||[]).filter(p=>p.subreddit==='CoinGecko').map(p=>
+  }else if(tab==='coingecko'){
+    const d=await fetch(API+'/api/social').then(r=>r.json()).catch(()=>({posts:[]}));
+    const posts=(d.posts||[]).filter(p=>p.subreddit==='CoinGecko');
+    if(!posts.length){el.innerHTML='<div class="card" style="padding:30px;text-align:center;color:var(--muted)">No CoinGecko data.</div>';return;}
+    el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">📱 CoinGecko Trending</div><span style="font-size:10px;color:var(--green)">LIVE</span></div>'+
+    posts.map((p,i)=>
       '<div class="social-item" onclick="window.open(\''+p.url+'\',\'_blank\')">'+
-      '<div style="font-size:11px;color:var(--text);margin-bottom:4px">'+p.title.slice(0,60)+'</div>'+
-      '<div style="display:flex;gap:8px">'+
-      '<span style="font-size:9px;background:rgba(0,212,255,.1);color:var(--accent);padding:2px 6px;border-radius:4px">CoinGecko</span>'+
-      (p.symbol?'<span style="font-size:9px;color:var(--green)">$'+p.symbol+'</span>':'')+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+      '<div style="font-size:12px;color:var(--dim);width:24px">'+(i+1)+'</div>'+
+      '<div class="token-avatar" style="'+ac(p.symbol||'C')+'">'+( p.symbol||'C')[0].toUpperCase()+'</div>'+
+      '<div style="flex:1">'+
+      '<div style="font-size:12px;font-weight:600;color:var(--text)">'+p.title.replace(' trending on CoinGecko','')+'</div>'+
+      '<div style="display:flex;gap:8px;margin-top:4px">'+
+      (p.symbol?'<span style="font-size:10px;color:var(--accent)">$'+p.symbol+'</span>':'')+
+      '<span style="font-size:9px;background:rgba(0,255,136,.1);color:var(--green);padding:2px 6px;border-radius:4px">'+p.sentiment+'</span>'+
+      '</div></div>'+
+      '<div style="font-size:9px;color:var(--accent)">→</div>'+
       '</div></div>'
-    ).join('')+'</div>'+
+    ).join('')+'</div>';
 
-    '<div class="card"><div class="card-header"><div class="card-title">🏆 Top by Market Cap</div></div>'+
-    (topRes.tokens||[]).slice(0,10).map((t,i)=>{
+  }else if(tab==='market'){
+    const d=await fetch(API+'/api/top-tokens').then(r=>r.json()).catch(()=>({tokens:[]}));
+    const tokens=d.tokens||[];
+    if(!tokens.length){el.innerHTML='<div class="card" style="padding:30px;text-align:center;color:var(--muted)">No market data.</div>';return;}
+    el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">🏆 Top Tokens by Market Cap</div><span style="font-size:10px;color:var(--muted)">CoinGecko Live</span></div>'+
+    tokens.map((t,i)=>{
       const chg=t.price_change_percentage_24h||0;
       return'<div class="top-token-item">'+
       '<div style="font-size:11px;color:var(--dim);width:24px">'+(i+1)+'</div>'+
       '<div class="token-avatar" style="'+ac(t.symbol)+'">'+t.symbol[0].toUpperCase()+'</div>'+
-      '<div style="flex:1"><div style="font-size:12px">'+t.name+'</div>'+
-      '<div style="font-size:10px;color:var(--muted)">'+t.symbol.toUpperCase()+'</div></div>'+
-      '<div style="text-align:right"><div style="font-size:12px">$'+fp(t.current_price)+'</div>'+
+      '<div style="flex:1">'+
+      '<div style="font-size:13px;font-weight:500">'+t.name+'</div>'+
+      '<div style="font-size:10px;color:var(--muted)">'+t.symbol.toUpperCase()+' • MCap: '+fv(t.market_cap)+'</div></div>'+
+      '<div style="text-align:right">'+
+      '<div style="font-size:13px;font-weight:500">$'+fp(t.current_price)+'</div>'+
       '<div style="font-size:10px;color:'+(chg>=0?'var(--green)':'var(--red)')+'">'+(chg>=0?'▲':'▼')+Math.abs(chg).toFixed(1)+'%</div></div></div>';
-    }).join('')+'</div></div>';
+    }).join('')+'</div>';
+  }
   bump();
 }
 
