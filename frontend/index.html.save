@@ -745,72 +745,33 @@ async function renderTrending(){
 }
 
 async function loadTrending(){
-  const [socialRes,topRes,trendRes]=await Promise.all([
+  const [socialRes,topRes]=await Promise.all([
     fetch(API+'/api/social').then(r=>r.json()).catch(()=>({posts:[]})),
     fetch(API+'/api/top-tokens').then(r=>r.json()).catch(()=>({tokens:[]})),
-    fetch(API+'/api/trending').then(r=>r.json()).catch(()=>({trending:[]})),
   ]);
   const el=document.getElementById('trendContent');if(!el)return;
-
-  const trending=trendRes.trending||[];
-  const chainIcon={solana:'🟣',bsc:'🟡',ethereum:'⟠',base:'🔵',arbitrum:'🔷',polygon:'🟣'};
-
-  el.innerHTML=
-    '<div class="card" style="margin-bottom:20px">'+
-    '<div class="card-header"><div class="card-title">🔥 DexScreener Boosted Tokens</div><span style="font-size:10px;color:var(--green)">LIVE</span></div>'+
-    trending.map((t,i)=>{
-      const chain=t.chainId||'solana';
-      const icon=chainIcon[chain]||'🔗';
-      const desc=(t.description||'').slice(0,80);
-      return'<div class="social-item" onclick="window.open(\''+t.url+'\',\'_blank\')">'+
-      '<div style="display:flex;align-items:center;gap:10px">'+
-      '<div style="font-size:11px;color:var(--dim);width:20px">'+(i+1)+'</div>'+
-      '<div>'+
-      '<div style="font-size:12px;font-weight:600;color:var(--accent)">'+icon+' '+(t.tokenAddress||'').slice(0,8)+'...</div>'+
-      '<div style="font-size:10px;color:var(--text);margin-top:2px">'+desc+(desc.length>=80?'...':'')+'</div>'+
-      '<div style="display:flex;gap:8px;margin-top:4px">'+
-      '<span style="font-size:9px;background:rgba(0,255,136,.1);color:var(--green);padding:2px 6px;border-radius:4px">'+chain.toUpperCase()+'</span>'+
-      '<span style="font-size:9px;color:var(--yellow)">🔥 Boost: '+t.totalAmount+'</span>'+
-      (t.links&&t.links.find(l=>l.type==='twitter')?'<a href="'+t.links.find(l=>l.type==='twitter').url+'" target="_blank" style="font-size:9px;color:#1da1f2;text-decoration:none">𝕏 Twitter</a>':'')+
-      (t.links&&t.links.find(l=>l.type==='telegram')?'<a href="'+t.links.find(l=>l.type==='telegram').url+'" target="_blank" style="font-size:9px;color:var(--accent);text-decoration:none">✈️ TG</a>':'')+
-      '</div></div></div></div>'
-    }).join('')+'</div>'+
-
-    '<div class="grid-2">'+
-    '<div class="card"><div class="card-header"><div class="card-title">📱 CoinGecko Trending</div></div>'+
-    (socialRes.posts||[]).filter(p=>p.subreddit==='CoinGecko').map(p=>
-      '<div class="social-item" onclick="window.open(\''+p.url+'\',\'_blank\')">'+
-      '<div style="font-size:11px;color:var(--text);margin-bottom:4px">'+p.title.slice(0,60)+'</div>'+
-      '<div style="display:flex;gap:8px">'+
-      '<span style="font-size:9px;background:rgba(0,212,255,.1);color:var(--accent);padding:2px 6px;border-radius:4px">CoinGecko</span>'+
-      (p.symbol?'<span style="font-size:9px;color:var(--green)">$'+p.symbol+'</span>':'')+
-      '</div></div>'
-    ).join('')+'</div>'+
-
-    '<div class="card"><div class="card-header"><div class="card-title">🏆 Top by Market Cap</div></div>'+
-    (topRes.tokens||[]).slice(0,10).map((t,i)=>{
-      const chg=t.price_change_percentage_24h||0;
-      return'<div class="top-token-item">'+
-      '<div style="font-size:11px;color:var(--dim);width:24px">'+(i+1)+'</div>'+
-      '<div class="token-avatar" style="'+ac(t.symbol)+'">'+t.symbol[0].toUpperCase()+'</div>'+
-      '<div style="flex:1"><div style="font-size:12px">'+t.name+'</div>'+
-      '<div style="font-size:10px;color:var(--muted)">'+t.symbol.toUpperCase()+'</div></div>'+
-      '<div style="text-align:right"><div style="font-size:12px">$'+fp(t.current_price)+'</div>'+
-      '<div style="font-size:10px;color:'+(chg>=0?'var(--green)':'var(--red)')+'">'+(chg>=0?'▲':'▼')+Math.abs(chg).toFixed(1)+'%</div></div></div>';
-    }).join('')+'</div></div>';
+  el.innerHTML='<div class="grid-2">'+
+  '<div class="card"><div class="card-header"><div class="card-title">📱 Social Signals</div></div>'+
+  (socialRes.posts||[]).map(p=>
+    '<div class="social-item" onclick="window.open(\''+p.url+'\',\'_blank\')">'+
+    '<div style="font-size:11px;color:var(--text);margin-bottom:4px">'+p.title.slice(0,80)+'</div>'+
+    '<div style="display:flex;gap:8px">'+
+    '<span style="font-size:9px;background:rgba(0,255,136,.1);color:var(--green);padding:2px 6px;border-radius:4px">'+p.subreddit+'</span>'+
+    (p.symbol?'<span style="font-size:9px;color:var(--accent)">$'+p.symbol+'</span>':'')+
+    '</div></div>'
+  ).join('')+'</div>'+
+  '<div class="card"><div class="card-header"><div class="card-title">🏆 Top by Market Cap</div></div>'+
+  (topRes.tokens||[]).slice(0,10).map((t,i)=>{
+    const chg=t.price_change_percentage_24h||0;
+    return'<div class="top-token-item">'+
+    '<div style="font-size:11px;color:var(--dim);width:24px">'+(i+1)+'</div>'+
+    '<div class="token-avatar" style="'+ac(t.symbol)+'">'+t.symbol[0].toUpperCase()+'</div>'+
+    '<div style="flex:1"><div style="font-size:12px">'+t.name+'</div>'+
+    '<div style="font-size:10px;color:var(--muted)">'+t.symbol.toUpperCase()+'</div></div>'+
+    '<div style="text-align:right"><div style="font-size:12px">$'+fp(t.current_price)+'</div>'+
+    '<div style="font-size:10px;color:'+(chg>=0?'var(--green)':'var(--red)')+'">'+(chg>=0?'▲':'▼')+Math.abs(chg).toFixed(1)+'%</div></div></div>';
+  }).join('')+'</div></div>';
   bump();
-}
-
-// ========== WATCHLIST ==========
-function addToWatchlist(sym){if(!watchlist.includes(sym)){watchlist.push(sym);localStorage.setItem('watchlist',JSON.stringify(watchlist));showToast('⭐ '+sym+' added!');}}
-function removeFromWatchlist(sym){watchlist=watchlist.filter(s=>s!==sym);localStorage.setItem('watchlist',JSON.stringify(watchlist));renderWatchlist();}
-function renderWatchlist(){
-  stopTimer();
-  document.getElementById('mainContent').innerHTML='<div class="page-header"><div class="page-title">⭐ My <span>Watchlist</span></div></div>'+
-  (watchlist.length===0?
-    '<div class="card" style="padding:50px;text-align:center"><div style="font-size:32px;margin-bottom:12px">⭐</div><div style="color:var(--muted)">Empty। Token এ click করে add করো।</div></div>':
-    '<div class="card"><div class="card-header"><div class="card-title">Saved Tokens ('+watchlist.length+')</div></div>'+
-    watchlist.map((sym,i)=>'<div class="token-row" style="grid-template-columns:36px 1fr 100px">'+
     '<div class="token-rank">'+(i+1)+'</div>'+
     '<div class="token-info"><div class="token-avatar" style="'+ac(sym)+'">'+sym[0]+'</div>'+
     '<div class="token-name">'+sym+'</div></div>'+
