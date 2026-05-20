@@ -9,6 +9,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 load_dotenv()
 ETHERSCAN_KEY = os.getenv("ETHERSCAN_API_KEY")
+COINGECKO_KEY = os.getenv("COINGECKO_API_KEY")
 SOLSCAN_KEY = os.getenv("SOLSCAN_API_KEY")
 
 app = FastAPI(title="CryptoSense AI Backend")
@@ -265,13 +266,13 @@ async def get_token_pairs(address: str):
     return d or {"pairs": []}
 
 async def update_global():
-    d = await fetch("https://api.coingecko.com/api/v3/global")
+    d = await fetch(f"https://api.coingecko.com/api/v3/global?x_cg_demo_api_key={COINGECKO_KEY}")
     if d:
         cache["global"] = d
         print("Global updated")
 
 async def update_top_tokens():
-    d = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h")
+    d = await fetch(f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h&x_cg_demo_api_key={COINGECKO_KEY}")
     if d and isinstance(d, list):
         cache["top_tokens"] = d
         print("Top tokens updated")
