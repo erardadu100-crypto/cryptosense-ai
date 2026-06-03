@@ -172,6 +172,50 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .back-btn:hover{border-color:var(--accent);color:var(--accent);}
 .chain-filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
 .chain-stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;}
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sidebar{display:none;}
+  .main{margin-left:0;margin-top:36px;padding:12px;}
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px;}
+  .grid-2{grid-template-columns:1fr;}
+  .grid-3{grid-template-columns:1fr;}
+  .token-row{grid-template-columns:28px 1fr 70px 70px!important;}
+  .token-row .token-volume,.token-row .ai-score{display:none;}
+  .token-row.header div:nth-child(4),.token-row.header div:nth-child(5),.token-row.header div:nth-child(6){display:none;}
+  .detail-stats{grid-template-columns:1fr 1fr;}
+  .result-grid{grid-template-columns:1fr 1fr;}
+  .chain-stats-grid{grid-template-columns:repeat(3,1fr);}
+  .token-detail-price{font-size:24px;}
+  .token-detail-name{font-size:20px;}
+  .page-title{font-size:18px;}
+  .ai-chat{width:calc(100vw - 24px);right:12px;bottom:70px;}
+  .fab{bottom:12px;right:12px;}
+  .realtime-bar{font-size:9px;padding:6px 10px;}
+  .chain-filter-bar{gap:6px;}
+  .btn-sm{padding:4px 8px;font-size:9px;}
+
+  /* Mobile Bottom Nav */
+  .mobile-nav{
+    display:flex!important;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--bg2);border-top:1px solid var(--border);
+    z-index:200;height:56px;
+  }
+  .mobile-nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:2px;cursor:pointer;
+    font-size:9px;color:var(--muted);transition:color .2s;
+  }
+  .mobile-nav-item.active{color:var(--accent);}
+  .mobile-nav-item span{font-size:18px;}
+  .main{padding-bottom:70px;}
+  .fab{bottom:68px;}
+  .ai-chat{bottom:126px;}
+}
+
+@media (min-width: 769px) {
+  .mobile-nav{display:none!important;}
+}
 </style>
 </head>
 <body>
@@ -201,6 +245,26 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div style="font-size:10px;color:var(--muted);margin-bottom:4px">CHAINS</div>
     <div style="font-size:10px;color:var(--green);line-height:2">⟠ ETH &nbsp; 🟡 BNB &nbsp; 🔵 BASE<br>🔷 ARB &nbsp; 🟣 POL &nbsp; 🟣 SOL</div>
     <div style="font-size:10px;color:var(--muted);margin-top:8px">Updates: <span style="color:var(--accent)" id="refreshCount">0</span>x</div>
+  </div>
+</div>
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-item active" onclick="showPage('dashboard');setMobileActive(this)">
+    <span>⚡</span>Home
+  </div>
+  <div class="mobile-nav-item" onclick="showPage('signals');setMobileActive(this)">
+    <span>🤖</span>AI
+  </div>
+  <div class="mobile-nav-item" onclick="showPage('whales');setMobileActive(this)">
+    <span>🐳</span>Whales
+  </div>
+  <div class="mobile-nav-item" onclick="showPage('scanner');setMobileActive(this)">
+    <span>🔍</span>Scanner
+  </div>
+  <div class="mobile-nav-item" onclick="showPage('scam');setMobileActive(this)">
+    <span>🛡️</span>Scam
+  </div>
+  <div class="mobile-nav-item" onclick="showPage('trending');setMobileActive(this)">
+    <span>🔥</span>Trend
   </div>
 </div>
 <div class="main" id="mainContent"></div>
@@ -842,6 +906,10 @@ function renderWatchlist(){
     '<button class="btn btn-outline" style="padding:4px 10px;font-size:10px" onclick="removeFromWatchlist(\''+sym+'\')">Remove</button></div>').join('')+'</div>');
 }
 
+function setMobileActive(el){
+  document.querySelectorAll('.mobile-nav-item').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+}
 function showToast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:90px;right:24px;background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:10px 16px;border-radius:10px;font-size:12px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4)';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
 function toggleChat(){const c=document.getElementById('aiChat'),f=document.getElementById('fab'),o=c.classList.toggle('open');f.style.display=o?'none':'flex';}
 async function sendChat(){
