@@ -487,6 +487,93 @@ async def get_token_detail(address: str):
     ai = calculate_ai_score(pair, whales, cache["sentiment"].get("score", 50))
     return {"pair": pair, "contract": contract_info, "ai_analysis": ai, "whale_activity": whales[:5], "sentiment": cache["sentiment"]}
 
+@app.get("/api/history/token/{coin_id}")
+async def get_token_history(coin_id: str, days: str = "7"):
+    days_map = {"1D": 1, "7D": 7, "30D": 30, "90D": 90}
+    d = days_map.get(days, 7)
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={d}&x_cg_demo_api_key={COINGECKO_KEY}"
+    data = await fetch(url)
+    return data or {}
+
+@app.get("/api/history/whales")
+async def get_whale_history():
+    """Return all cached whale transactions as history"""
+    all_whales = []
+    for chain, whales in cache["whales_by_chain"].items():
+        all_whales.extend(whales)
+    all_whales.sort(key=lambda x: x["timestamp"], reverse=True)
+    
+    # Stats
+    total = len(all_whales)
+    buys = sum(1 for w in all_whales if w.get("type") == "buy")
+    sells = sum(1 for w in all_whales if w.get("type") == "sell")
+    by_chain = {}
+    for w in all_whales:
+        chain = w.get("chain", "unknown")
+        if chain not in by_chain:
+            by_chain[chain] = {"buys": 0, "sells": 0, "total": 0}
+        by_chain[chain]["total"] += 1
+        if w.get("type") == "buy":
+            by_chain[chain]["buys"] += 1
+        else:
+            by_chain[chain]["sells"] += 1
+    
+    return {
+        "whales": all_whales,
+        "stats": {
+            "total": total,
+            "buys": buys,
+            "sells": sells,
+            "buy_ratio": round(buys/total*100) if total else 0,
+            "by_chain": by_chain,
+        }
+    }
+
+@app.get("/api/analytics")
+async def get_analytics():
+    """Full analytics data"""
+    all_whales = []
+    for chain, whales in cache["whales_by_chain"].items():
+        all_whales.extend(whales)
+    
+    total = len(all_whales)
+    buys = sum(1 for w in all_whales if w.get("type") == "buy")
+    sells = total - buys
+    
+    # Top symbols
+    symbol_count = {}
+    for w in all_whales:
+        sym = w.get("symbol", "???")
+        if sym not in symbol_count:
+            symbol_count[sym] = {"buys": 0, "sells": 0}
+        if w.get("type") == "buy":
+            symbol_count[sym]["buys"] += 1
+        else:
+            symbol_count[sym]["sells"] += 1
+    
+    top_symbols = sorted(symbol_count.items(), key=lambda x: x[1]["buys"]+x[1]["sells"], reverse=True)[:10]
+    
+    # Chain distribution
+    chain_dist = {}
+    for w in all_whales:
+        chain = w.get("chain", "unknown")
+        chain_dist[chain] = chain_dist.get(chain, 0) + 1
+    
+    return {
+        "summary": {
+            "total_transactions": total,
+            "total_buys": buys,
+            "total_sells": sells,
+            "buy_ratio": round(buys/total*100) if total else 0,
+            "sell_ratio": round(sells/total*100) if total else 0,
+            "chains_tracked": len(cache["whales_by_chain"]),
+            "market_sentiment": cache["sentiment"].get("label", "Neutral"),
+            "fear_greed": cache["sentiment"].get("score", 50),
+        },
+        "top_symbols": [{"symbol": s, "buys": d["buys"], "sells": d["sells"]} for s,d in top_symbols],
+        "chain_distribution": chain_dist,
+        "recent_whales": all_whales[:10],
+    }
 @app.get("/api/analyze/{address}")
 async def analyze_contract(address: str):
     pairs_data = await get_token_pairs(address)
