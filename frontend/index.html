@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>CryptoSense AI — Intelligence Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -159,8 +159,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .detail-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
 .detail-stat-value{font-size:14px;font-weight:600;}
 .chart-container{position:relative;height:300px;padding:20px;}
-.chart-tabs{display:flex;gap:8px;padding:16px 20px 0;}
-.chart-tab{padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:all .2s;background:transparent;}
+.chart-tab{padding:6px 12px;border-radius:6px;font-size:10px;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:all .2s;background:transparent;}
 .chart-tab.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700;}
 .ai-breakdown{padding:16px 20px;}
 .ai-breakdown-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
@@ -172,13 +171,23 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .back-btn:hover{border-color:var(--accent);color:var(--accent);}
 .chain-filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
 .chain-stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;}
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
+.analytics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.analytics-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:all .3s;}
+.analytics-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.tab-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:200;height:56px;}
+.mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:9px;color:var(--muted);transition:color .2s;}
+.mobile-nav-item.active{color:var(--accent);}
+.mobile-nav-item span{font-size:18px;}
+
+/* MOBILE RESPONSIVE */
+@media (max-width:768px){
   .sidebar{display:none;}
-  .main{margin-left:0;margin-top:36px;padding:12px;}
+  .main{margin-left:0;margin-top:36px;padding:12px;padding-bottom:70px;}
   .stats-row{grid-template-columns:1fr 1fr;gap:10px;}
   .grid-2{grid-template-columns:1fr;}
   .grid-3{grid-template-columns:1fr;}
+  .analytics-grid{grid-template-columns:1fr 1fr;}
   .token-row{grid-template-columns:28px 1fr 70px 70px!important;}
   .token-row .token-volume,.token-row .ai-score{display:none;}
   .token-row.header div:nth-child(4),.token-row.header div:nth-child(5),.token-row.header div:nth-child(6){display:none;}
@@ -189,33 +198,11 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   .token-detail-name{font-size:20px;}
   .page-title{font-size:18px;}
   .ai-chat{width:calc(100vw - 24px);right:12px;bottom:70px;}
-  .fab{bottom:12px;right:12px;}
-  .realtime-bar{font-size:9px;padding:6px 10px;}
-  .chain-filter-bar{gap:6px;}
-  .btn-sm{padding:4px 8px;font-size:9px;}
-
-  /* Mobile Bottom Nav */
-  .mobile-nav{
-    display:flex!important;
-    position:fixed;bottom:0;left:0;right:0;
-    background:var(--bg2);border-top:1px solid var(--border);
-    z-index:200;height:56px;
-  }
-  .mobile-nav-item{
-    flex:1;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:2px;cursor:pointer;
-    font-size:9px;color:var(--muted);transition:color .2s;
-  }
-  .mobile-nav-item.active{color:var(--accent);}
-  .mobile-nav-item span{font-size:18px;}
-  .main{padding-bottom:70px;}
-  .fab{bottom:68px;}
-  .ai-chat{bottom:126px;}
+  .fab{bottom:68px;right:12px;}
+  .mobile-nav{display:flex!important;}
+  .ai-breakdown-label{width:90px;}
 }
-
-@media (min-width: 769px) {
-  .mobile-nav{display:none!important;}
-}
+@media (min-width:769px){.mobile-nav{display:none!important;}}
 </style>
 </head>
 <body>
@@ -233,6 +220,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">⚡</span>Dashboard<span class="nav-badge live">LIVE</span></div>
     <div class="nav-item" onclick="showPage('signals')"><span class="nav-icon">🤖</span>AI Signals</div>
     <div class="nav-item" onclick="showPage('whales')"><span class="nav-icon">🐳</span>Whale Tracker</div>
+    <div class="nav-item" onclick="showPage('analytics')"><span class="nav-icon">📊</span>Analytics</div>
   </div>
   <div class="nav-section">
     <div class="nav-section-label">Tools</div>
@@ -247,27 +235,18 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div style="font-size:10px;color:var(--muted);margin-top:8px">Updates: <span style="color:var(--accent)" id="refreshCount">0</span>x</div>
   </div>
 </div>
+
 <div class="mobile-nav" id="mobileNav">
-  <div class="mobile-nav-item active" onclick="showPage('dashboard');setMobileActive(this)">
-    <span>⚡</span>Home
-  </div>
-  <div class="mobile-nav-item" onclick="showPage('signals');setMobileActive(this)">
-    <span>🤖</span>AI
-  </div>
-  <div class="mobile-nav-item" onclick="showPage('whales');setMobileActive(this)">
-    <span>🐳</span>Whales
-  </div>
-  <div class="mobile-nav-item" onclick="showPage('scanner');setMobileActive(this)">
-    <span>🔍</span>Scanner
-  </div>
-  <div class="mobile-nav-item" onclick="showPage('scam');setMobileActive(this)">
-    <span>🛡️</span>Scam
-  </div>
-  <div class="mobile-nav-item" onclick="showPage('trending');setMobileActive(this)">
-    <span>🔥</span>Trend
-  </div>
+  <div class="mobile-nav-item active" onclick="showPage('dashboard');setMobileActive(this)"><span>⚡</span>Home</div>
+  <div class="mobile-nav-item" onclick="showPage('signals');setMobileActive(this)"><span>🤖</span>AI</div>
+  <div class="mobile-nav-item" onclick="showPage('whales');setMobileActive(this)"><span>🐳</span>Whales</div>
+  <div class="mobile-nav-item" onclick="showPage('analytics');setMobileActive(this)"><span>📊</span>Analytics</div>
+  <div class="mobile-nav-item" onclick="showPage('trending');setMobileActive(this)"><span>🔥</span>Trend</div>
+  <div class="mobile-nav-item" onclick="showPage('scam');setMobileActive(this)"><span>🛡️</span>Scam</div>
 </div>
+
 <div class="main" id="mainContent"></div>
+
 <button class="fab" id="fab" onclick="toggleChat()">🤖</button>
 <div class="ai-chat" id="aiChat">
   <div class="ai-chat-header">
@@ -282,6 +261,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <button class="chat-send" onclick="sendChat()">➤</button>
   </div>
 </div>
+
 <script>
 const API='https://cryptosense-ai-backend.onrender.com';
 let watchlist=JSON.parse(localStorage.getItem('watchlist')||'[]');
@@ -289,8 +269,10 @@ let refreshCount=0;
 let pageTimer=null;
 let currentPage='dashboard';
 let priceChart=null;
+let analyticsChart=null;
 let prevPage='dashboard';
 let currentChainFilter='all';
+let currentTrendTab='dex';
 
 function fp(p){const n=parseFloat(p);if(!n)return'—';if(n>=1000)return n.toLocaleString('en',{maximumFractionDigits:2});if(n>=1)return n.toFixed(4);if(n>=0.01)return n.toFixed(5);return n.toExponential(2);}
 function fv(v){const n=parseFloat(v);if(!n)return'—';if(n>=1e9)return'$'+(n/1e9).toFixed(1)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(1)+'K';return'$'+n.toFixed(0);}
@@ -318,23 +300,23 @@ function buildTickerFromTop(tokens){
   const items=tokens.map(t=>{const chg=t.price_change_percentage_24h||0,dir=chg>=0?'up':'dn';return'<div class="ticker-item"><span class="sym">'+t.symbol.toUpperCase()+'</span><span>$'+fp(t.current_price)+'</span><span class="'+dir+'">'+(chg>=0?'▲':'▼')+Math.abs(chg).toFixed(1)+'%</span></div>';}).join('');
   document.getElementById('ticker').innerHTML=items+items;
 }
-
 function buildTicker(pairs){
   if(!pairs||!pairs.length)return;
   const items=pairs.map(t=>{const chg=parseFloat(t.priceChange?.h24||0),sym=t.baseToken?.symbol||'???',dir=chg>=0?'up':'dn';return'<div class="ticker-item"><span class="sym">'+sym+'</span><span>$'+fp(t.priceUsd)+'</span><span class="'+dir+'">'+(chg>=0?'▲':'▼')+Math.abs(chg).toFixed(1)+'%</span></div>';}).join('');
   document.getElementById('ticker').innerHTML=items+items;
 }
 
-function stopTimer(){if(pageTimer){clearInterval(pageTimer);pageTimer=null;}if(priceChart){priceChart.destroy();priceChart=null;}}
+function stopTimer(){if(pageTimer){clearInterval(pageTimer);pageTimer=null;}if(priceChart){priceChart.destroy();priceChart=null;}if(analyticsChart){analyticsChart.destroy();analyticsChart=null;}}
 function bump(){refreshCount++;const el=document.getElementById('refreshCount');if(el)el.textContent=refreshCount;const lu=document.getElementById('lastUpdate');if(lu)lu.textContent='Updated: '+new Date().toLocaleTimeString();}
+function setMobileActive(el){document.querySelectorAll('.mobile-nav-item').forEach(e=>e.classList.remove('active'));el.classList.add('active');}
 
 function showPage(page){
   if(page!=='token')prevPage=currentPage;
   currentPage=page;stopTimer();
   document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
-  const map={dashboard:0,signals:1,whales:2,scanner:3,scam:4,trending:5,watchlist:6};
+  const map={dashboard:0,signals:1,whales:2,analytics:3,scanner:4,scam:5,trending:6,watchlist:7};
   document.querySelectorAll('.nav-item')[map[page]]?.classList.add('active');
-  ({dashboard:renderDashboard,signals:renderSignals,whales:renderWhales,scanner:renderScanner,scam:renderScam,trending:renderTrending,watchlist:renderWatchlist})[page]?.();
+  ({dashboard:renderDashboard,signals:renderSignals,whales:renderWhales,analytics:renderAnalytics,scanner:renderScanner,scam:renderScam,trending:renderTrending,watchlist:renderWatchlist})[page]?.();
 }
 
 // ========== TOKEN DETAIL ==========
@@ -361,17 +343,17 @@ async function showTokenDetail(pair){
   document.getElementById('mainContent').innerHTML=`
     <div class="back-btn" onclick="showPage('${prevPage}')">← Back</div>
     <div class="token-detail-header">
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
         <div class="token-avatar" style="${ac(sym)};width:52px;height:52px;font-size:22px">${sym[0]}</div>
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="token-detail-name">${name} <span style="font-size:16px;color:var(--muted)">${sym}</span></div>
-          <div style="display:flex;gap:8px;margin-top:6px">
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
             <span class="chain-tag ${cc[chain]||'eth'}">${chain}</span>
             <span style="font-size:10px;color:var(--muted)">${pair.dexId||'DEX'}</span>
             <a href="${dexUrl}" target="_blank" style="font-size:10px;color:var(--accent);text-decoration:none">🔗 DexScreener</a>
           </div>
         </div>
-        <div style="margin-left:auto;text-align:right">
+        <div style="text-align:right">
           <div class="token-detail-price">$${fp(price)}</div>
           <div style="font-size:14px;color:${chg24>=0?'var(--green)':'var(--red)'};margin-top:4px">${chg24>=0?'▲':'▼'}${Math.abs(chg24).toFixed(2)}% (24h)</div>
         </div>
@@ -383,18 +365,25 @@ async function showTokenDetail(pair){
         <div class="detail-stat"><div class="detail-stat-label">1h Change</div><div class="detail-stat-value" style="color:${chg1h>=0?'var(--green)':'var(--red)'}">${chg1h>=0?'▲':'▼'}${Math.abs(chg1h).toFixed(2)}%</div></div>
       </div>
     </div>
+
     <div class="grid-3">
       <div class="card">
         <div class="card-header">
           <div class="card-title">📊 Price Chart</div>
-          <div style="display:flex;gap:6px">
-            <span class="chart-tab active" onclick="changeChart('24h',this)">24H</span>
-            <span class="chart-tab" onclick="changeChart('7d',this)">7D</span>
-            <span class="chart-tab" onclick="changeChart('30d',this)">30D</span>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <span class="chart-tab active" onclick="loadChart('5m',this)">5M</span>
+            <span class="chart-tab" onclick="loadChart('15m',this)">15M</span>
+            <span class="chart-tab" onclick="loadChart('30m',this)">30M</span>
+            <span class="chart-tab" onclick="loadChart('1H',this)">1H</span>
+            <span class="chart-tab" onclick="loadChart('4H',this)">4H</span>
+            <span class="chart-tab" onclick="loadChart('1D',this)">1D</span>
+            <span class="chart-tab" onclick="loadChart('7D',this)">7D</span>
+            <span class="chart-tab" onclick="loadChart('30D',this)">30D</span>
           </div>
         </div>
         <div class="chart-container"><canvas id="priceChart"></canvas></div>
       </div>
+
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="card" style="margin-bottom:0">
           <div class="card-header"><div class="card-title">🤖 AI Analysis</div></div>
@@ -404,60 +393,67 @@ async function showTokenDetail(pair){
             <div style="font-size:12px;margin-top:4px;color:${aiScore>=70?'var(--green)':aiScore>=45?'var(--yellow)':'var(--red)'}">Risk: ${aiScore>=70?'LOW':aiScore>=45?'MEDIUM':'HIGH'}</div>
           </div>
           <div class="ai-breakdown">
-            ${[{label:'Volume Score',val:volScore,color:'#00d4ff'},{label:'Liquidity Score',val:liqScore,color:'#00ff88'},{label:'Momentum',val:momentumScore,color:'#ffb800'},{label:'Whale Activity',val:whaleScore,color:'#a78bfa'},{label:'Market Sentiment',val:sentScore,color:'#ff6b35'}].map(r=>`<div class="ai-breakdown-row"><div class="ai-breakdown-label">${r.label}</div><div class="ai-breakdown-bar"><div class="ai-breakdown-fill" style="width:${r.val}%;background:${r.color}"></div></div><div class="ai-breakdown-val" style="color:${r.color}">${r.val}</div></div>`).join('')}
+            ${[{label:'Volume',val:volScore,color:'#00d4ff'},{label:'Liquidity',val:liqScore,color:'#00ff88'},{label:'Momentum',val:momentumScore,color:'#ffb800'},{label:'Whale Activity',val:whaleScore,color:'#a78bfa'},{label:'Sentiment',val:sentScore,color:'#ff6b35'}].map(r=>`<div class="ai-breakdown-row"><div class="ai-breakdown-label">${r.label}</div><div class="ai-breakdown-bar"><div class="ai-breakdown-fill" style="width:${r.val}%;background:${r.color}"></div></div><div class="ai-breakdown-val" style="color:${r.color}">${r.val}</div></div>`).join('')}
           </div>
         </div>
         <div class="card" style="margin-bottom:0">
           <div class="card-header"><div class="card-title">⚠️ Risk Analysis</div></div>
           <div style="padding:16px 20px">
             ${[{label:'Honeypot Risk',val:liq<5000?'HIGH':'LOW',safe:liq>=5000},{label:'Rug Risk',val:(chg24<-40||liq<10000)?'HIGH':'LOW',safe:!(chg24<-40||liq<10000)},{label:'Liquidity Lock',val:liq>50000?'LIKELY':'UNVERIFIED',safe:liq>50000},{label:'Buy Pressure',val:buys>sells?'STRONG':'WEAK',safe:buys>sells}].map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,45,69,.5)"><span style="font-size:11px;color:var(--muted)">${r.label}</span><span style="font-size:11px;font-weight:600;color:${r.safe?'var(--green)':'var(--red)'}">${r.val}</span></div>`).join('')}
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" onclick="addToWatchlist('${sym}')">⭐ Watch</button>
+              <a href="${dexUrl}" target="_blank"><button class="btn btn-outline btn-sm">🔗 DEX</button></a>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header"><div class="card-title"><div class="live-dot"></div>🐳 Whale Activity</div></div>
-        ${whales.slice(0,5).map(w=>`<div class="whale-item" onclick="window.open('${w.etherscan_url}','_blank')"><div class="whale-type-icon ${w.type}">${w.type==='buy'?'🐳':'🚨'}</div><div class="whale-body"><div class="whale-title"><span style="font-size:9px;background:rgba(0,0,0,.3);padding:2px 5px;border-radius:3px;margin-right:4px">${w.chain_icon||''} ${w.chain_name||w.chain}</span><strong>${w.symbol}</strong> — ${fa(w.amount)} <span style="color:${w.type==='buy'?'var(--green)':'var(--red)'}">${w.type==='buy'?'▲ BUY':'▼ SELL'}</span></div><div class="whale-meta"><span class="whale-time">⏱ ${ta(w.timestamp)}</span><span class="whale-tag ${w.type==='buy'?'smart':'risk'}">${w.type==='buy'?'SMART':'EXIT'}</span></div></div></div>`).join('')}
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">📋 Token Info</div></div>
-        <div style="padding:16px 20px">
-          ${[{label:'Symbol',val:sym},{label:'Chain',val:chain},{label:'DEX',val:pair.dexId||'Unknown'},{label:'Pair',val:(pair.baseToken?.symbol||'?')+' / '+(pair.quoteToken?.symbol||'?')},{label:'Market Cap',val:pair.fdv?fv(pair.fdv):'—'},{label:'Contract',val:pair.baseToken?.address?pair.baseToken.address.slice(0,12)+'...':'—'}].map(r=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,45,69,.5)"><span style="font-size:11px;color:var(--muted)">${r.label}</span><span style="font-size:11px">${r.val}</span></div>`).join('')}
-          <div style="margin-top:12px;display:flex;gap:8px">
-            <button class="btn btn-primary btn-sm" onclick="addToWatchlist('${sym}')">⭐ Watch</button>
-            <a href="${dexUrl}" target="_blank"><button class="btn btn-outline btn-sm">🔗 DEX</button></a>
-          </div>
-        </div>
-      </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><div class="live-dot"></div>🐳 Whale Activity</div></div>
+      ${whales.slice(0,5).map(w=>`<div class="whale-item" onclick="window.open('${w.etherscan_url}','_blank')"><div class="whale-type-icon ${w.type}">${w.type==='buy'?'🐳':'🚨'}</div><div class="whale-body"><div class="whale-title"><span style="font-size:9px;background:rgba(0,0,0,.3);padding:2px 5px;border-radius:3px;margin-right:4px">${w.chain_icon||''}</span><strong>${w.symbol}</strong> — ${fa(w.amount)} <span style="color:${w.type==='buy'?'var(--green)':'var(--red)'}">${w.type==='buy'?'▲ BUY':'▼ SELL'}</span></div><div class="whale-meta"><span class="whale-time">⏱ ${ta(w.timestamp)}</span><span class="whale-tag ${w.type==='buy'?'smart':'risk'}">${w.type==='buy'?'SMART':'EXIT'}</span></div></div></div>`).join('')}
     </div>`;
-  drawChart(pair,chg24);
+
+  drawChart(pair,chg24,'5m');
 }
 
-function drawChart(pair,chg24){
+function drawChart(pair,chg24,period){
   const ctx=document.getElementById('priceChart');if(!ctx)return;
   if(priceChart){priceChart.destroy();priceChart=null;}
-  const price=parseFloat(pair.priceUsd||0),points=24;
+  const price=parseFloat(pair.priceUsd||0);
+  const periodMap={'5m':12,'15m':16,'30m':16,'1H':24,'4H':24,'1D':24,'7D':7,'30D':30};
+  const points=periodMap[period]||24;
   const prices=[];let p=price*(1-(chg24/100));
-  for(let i=0;i<points;i++){p=p*(1+(Math.random()-0.48)*0.03);prices.push(p);}
+  for(let i=0;i<points;i++){p=p*(1+(Math.random()-0.48)*0.02);prices.push(p);}
   prices.push(price);
-  const labels=Array.from({length:points+1},(_,i)=>{const h=new Date();h.setHours(h.getHours()-(points-i));return h.getHours()+':00';});
+  const labelMap={'5m':'min','15m':'min','30m':'min','1H':'h','4H':'h','1D':'h','7D':'d','30D':'d'};
+  const labels=Array.from({length:points+1},(_,i)=>i+''+labelMap[period]);
   const isUp=chg24>=0,color=isUp?'rgba(0,255,136,1)':'rgba(255,59,92,1)',colorAlpha=isUp?'rgba(0,255,136,0.1)':'rgba(255,59,92,0.1)';
   priceChart=new Chart(ctx,{type:'line',data:{labels,datasets:[{data:prices,borderColor:color,backgroundColor:colorAlpha,borderWidth:2,fill:true,tension:0.4,pointRadius:0,pointHoverRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'#111827',titleColor:'#e2e8f0',bodyColor:'#64748b',borderColor:'#1e2d45',borderWidth:1}},scales:{x:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10},maxTicksLimit:8}},y:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#64748b',font:{size:10},callback:v=>'$'+fp(v)}}},interaction:{mode:'nearest',axis:'x',intersect:false}}});
 }
 
-async function changeChart(period,el){
+async function loadChart(period,el){
   document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   try{
-    const days=period==='24h'?1:period==='7d'?7:30;
-    const d=await fetch('https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days='+days).then(r=>r.json());
-    if(d.prices&&priceChart){
-      priceChart.data.labels=d.prices.map(p=>{const dt=new Date(p[0]);return period==='24h'?dt.getHours()+':00':dt.getMonth()+1+'/'+dt.getDate();});
-      priceChart.data.datasets[0].data=d.prices.map(p=>p[1]);
+    const daysMap={'5m':1,'15m':1,'30m':1,'1H':1,'4H':7,'1D':1,'7D':7,'30D':30};
+    const days=daysMap[period]||1;
+    const d=await fetch(API+'/api/history/token/ethereum?days='+period).then(r=>r.json()).catch(()=>null);
+    if(d&&d.prices&&priceChart){
+      const prices=d.prices.map(p=>p[1]);
+      const labels=d.prices.map((p,i)=>{
+        const dt=new Date(p[0]);
+        if(period==='7D'||period==='30D')return dt.getMonth()+1+'/'+dt.getDate();
+        return dt.getHours()+':'+String(dt.getMinutes()).padStart(2,'0');
+      });
+      priceChart.data.labels=labels;
+      priceChart.data.datasets[0].data=prices;
+      const isUp=prices[prices.length-1]>=prices[0];
+      priceChart.data.datasets[0].borderColor=isUp?'rgba(0,255,136,1)':'rgba(255,59,92,1)';
+      priceChart.data.datasets[0].backgroundColor=isUp?'rgba(0,255,136,0.1)':'rgba(255,59,92,0.1)';
       priceChart.update();
     }
-  }catch{}
+  }catch(e){console.log(e);}
 }
 
 // ========== DASHBOARD ==========
@@ -466,7 +462,7 @@ async function renderDashboard(){
   document.getElementById('mainContent').innerHTML=`
     <div class="page-header">
       <div><div class="page-title">Intelligence <span>Dashboard</span></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Real-time AI crypto intelligence — 6 chains live</div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Real-time AI crypto intelligence</div></div>
       <button class="btn btn-primary" onclick="loadDashboard()">⟳ Refresh</button>
     </div>
     <div class="realtime-bar"><div class="realtime-dot"></div>REALTIME — ETH 10s • Whales 30s • 6 Chains<span class="last-update" id="lastUpdate">Loading...</span></div>
@@ -514,11 +510,7 @@ async function loadDashboard(){
   const fl=document.getElementById('fgLabel');if(fl)fl.textContent=sentRes.label||'Neutral';
   const sf=document.getElementById('sentFill');if(sf)sf.style.width=val+'%';
   const pairs=pairsRes?.pairs||[];
-  if(pairs.length){
-    renderTokenTable(pairs.slice(0,8),'tokenTable',whaleRes?.whales||[],val);
-    renderRiskAlerts(pairs);
-    buildTicker(pairs.slice(0,12));
-  }
+  if(pairs.length){renderTokenTable(pairs.slice(0,8),'tokenTable',whaleRes?.whales||[],val);renderRiskAlerts(pairs);buildTicker(pairs.slice(0,12));}
   renderDashWhales(whaleRes?.whales||[]);
   renderSocialFeed(socialRes?.posts||[]);
   renderTopTokens(topRes?.tokens||[]);
@@ -551,7 +543,7 @@ function renderDashWhales(whales){
     '<div class="whale-type-icon '+(w.type==='buy'?'buy':'sell')+'">'+(w.type==='buy'?'🐳':'🚨')+'</div>'+
     '<div class="whale-body"><div class="whale-title">'+
     '<span style="font-size:9px;background:rgba(0,0,0,.3);padding:2px 5px;border-radius:3px;margin-right:4px">'+(w.chain_icon||'')+'</span>'+
-    '<strong>'+w.symbol+'</strong> — '+fa(w.amount)+' '+w.symbol+' <span style="color:'+(w.type==='buy'?'var(--green)':'var(--red)')+';">'+(w.type==='buy'?'▲ BUY':'▼ SELL')+'</span></div>'+
+    '<strong>'+w.symbol+'</strong> — '+fa(w.amount)+' <span style="color:'+(w.type==='buy'?'var(--green)':'var(--red)')+';">'+(w.type==='buy'?'▲ BUY':'▼ SELL')+'</span></div>'+
     '<div class="whale-meta"><span class="whale-time">⏱ '+ta(w.timestamp)+'</span>'+
     '<span class="whale-tag '+(w.type==='buy'?'smart':'risk')+'">'+(w.type==='buy'?'SMART MONEY':'WHALE EXIT')+'</span></div></div></div>'
   ).join('');
@@ -603,7 +595,7 @@ function renderTopTokens(tokens){
 async function renderSignals(){
   document.getElementById('mainContent').innerHTML=
     '<div class="page-header"><div><div class="page-title">🤖 AI <span>Signals</span></div>'+
-    '<div style="font-size:11px;color:var(--muted);margin-top:4px">Click any token to see details & chart</div></div></div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-top:4px">Click token for details & chart</div></div></div>'+
     '<div class="realtime-bar"><div class="realtime-dot"></div>AI ANALYSIS LIVE — 15s<span class="last-update" id="lastUpdate">Loading...</span></div>'+
     '<div id="sigContent"><div class="loading"><div class="spinner"></div>Running AI analysis...</div></div>';
   await loadSignals();
@@ -622,7 +614,7 @@ async function loadSignals(){
   const whales=whaleRes.whales||[],sentiment=sentRes.score||50;
   window.signalPairs=pairs;
   const el=document.getElementById('sigContent');if(!el)return;
-  el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">🤖 AI Opportunity Scanner</div><span style="font-size:10px;color:var(--muted)">Click token for details & chart</span></div>'+
+  el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">🤖 AI Opportunity Scanner</div></div>'+
   '<div class="token-row header"><div>#</div><div>Token</div><div>Price</div><div>24h Vol</div><div>Change</div><div>AI Bullish %</div></div>'+
   pairs.map((p,i)=>{
     const sym=p.baseToken?.symbol||'???',chg=parseFloat(p.priceChange?.h24||0),s=calcScore(p,whales,sentiment),scc=sc(s),chain=gc(p);
@@ -638,7 +630,7 @@ async function loadSignals(){
   bump();
 }
 
-// ========== WHALE TRACKER (MULTI-CHAIN) ==========
+// ========== WHALE TRACKER ==========
 async function renderWhales(){
   document.getElementById('mainContent').innerHTML=`
     <div class="page-header">
@@ -647,40 +639,97 @@ async function renderWhales(){
       <button class="btn btn-primary" onclick="loadWhales('all')">⟳ Refresh</button>
     </div>
     <div class="realtime-bar"><div class="realtime-dot"></div>MULTI-CHAIN LIVE — ETH • BNB • BASE • ARB • POL • SOL<span class="last-update" id="lastUpdate">Loading...</span></div>
-    <div class="chain-filter-bar" id="chainFilters">
-      <button class="btn btn-primary btn-sm" onclick="loadWhales('all')" id="filter-all">🌐 All Chains</button>
-      <button class="btn btn-outline btn-sm" onclick="loadWhales('ethereum')" id="filter-ethereum">⟠ Ethereum</button>
-      <button class="btn btn-outline btn-sm" onclick="loadWhales('bnb')" id="filter-bnb">🟡 BNB</button>
-      <button class="btn btn-outline btn-sm" onclick="loadWhales('base')" id="filter-base">🔵 Base</button>
-      <button class="btn btn-outline btn-sm" onclick="loadWhales('arbitrum')" id="filter-arbitrum">🔷 Arbitrum</button>
-      <button class="btn btn-outline btn-sm" onclick="loadWhales('polygon')" id="filter-polygon">🟣 Polygon</button>
-      <button class="btn btn-outline btn-sm" onclick="loadWhales('solana')" id="filter-solana">🟣 Solana</button>
+    <div class="tab-bar">
+      <button class="btn btn-primary btn-sm" onclick="switchWhaleTab('live')" id="wtab-live">🔴 Live</button>
+      <button class="btn btn-outline btn-sm" onclick="switchWhaleTab('history')" id="wtab-history">📊 History</button>
     </div>
-    <div class="chain-stats-grid" id="chainStats"></div>
-    <div id="whaleContent"><div class="loading"><div class="spinner"></div>Fetching whale data...</div></div>`;
-  await loadChainStats();
-  await loadWhales('all');
+    <div id="whaleTabContent"></div>`;
+  await switchWhaleTab('live');
   stopTimer();
-  pageTimer=setInterval(()=>{if(currentPage==='whales'){loadChainStats();loadWhales(currentChainFilter);}},30000);
+  pageTimer=setInterval(()=>{if(currentPage==='whales')switchWhaleTab(currentWhaleTab);},30000);
+}
+
+let currentWhaleTab='live';
+
+async function switchWhaleTab(tab){
+  currentWhaleTab=tab;
+  document.querySelectorAll('[id^="wtab-"]').forEach(b=>b.className='btn btn-outline btn-sm');
+  document.getElementById('wtab-'+tab).className='btn btn-primary btn-sm';
+  const el=document.getElementById('whaleTabContent');if(!el)return;
+
+  if(tab==='live'){
+    el.innerHTML=`
+      <div class="chain-filter-bar" id="chainFilters">
+        <button class="btn btn-primary btn-sm" onclick="loadWhales('all')" id="filter-all">🌐 All</button>
+        <button class="btn btn-outline btn-sm" onclick="loadWhales('ethereum')" id="filter-ethereum">⟠ ETH</button>
+        <button class="btn btn-outline btn-sm" onclick="loadWhales('bnb')" id="filter-bnb">🟡 BNB</button>
+        <button class="btn btn-outline btn-sm" onclick="loadWhales('base')" id="filter-base">🔵 Base</button>
+        <button class="btn btn-outline btn-sm" onclick="loadWhales('arbitrum')" id="filter-arbitrum">🔷 ARB</button>
+        <button class="btn btn-outline btn-sm" onclick="loadWhales('polygon')" id="filter-polygon">🟣 POL</button>
+        <button class="btn btn-outline btn-sm" onclick="loadWhales('solana')" id="filter-solana">🟣 SOL</button>
+      </div>
+      <div class="chain-stats-grid" id="chainStats"></div>
+      <div id="whaleContent"><div class="loading"><div class="spinner"></div></div></div>`;
+    await loadChainStats();
+    await loadWhales('all');
+  } else {
+    await loadWhaleHistory();
+  }
+}
+
+async function loadWhaleHistory(){
+  const el=document.getElementById('whaleTabContent');if(!el)return;
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Loading whale history...</div>';
+  const d=await fetch(API+'/api/history/whales').then(r=>r.json()).catch(()=>({whales:[],stats:{}}));
+  const whales=d.whales||[],stats=d.stats||{};
+
+  el.innerHTML=`
+    <div class="analytics-grid" style="margin-bottom:20px">
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">🐳</div>
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--accent)">${stats.total||0}</div>
+        <div style="font-size:11px;color:var(--muted)">Total Transactions</div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">📈</div>
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--green)">${stats.buys||0}</div>
+        <div style="font-size:11px;color:var(--muted)">Smart Money Buys</div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">📉</div>
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--red)">${stats.sells||0}</div>
+        <div style="font-size:11px;color:var(--muted)">Whale Exits</div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">💚</div>
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:${(stats.buy_ratio||0)>50?'var(--green)':'var(--red)'}">${stats.buy_ratio||0}%</div>
+        <div style="font-size:11px;color:var(--muted)">Buy Ratio</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">📊 Whale Transaction History</div><span style="font-size:10px;color:var(--green)">${whales.length} TXs</span></div>
+      ${whales.map(w=>
+        '<div class="whale-item" onclick="window.open(\''+w.etherscan_url+'\',\'_blank\')">'+
+        '<div class="whale-type-icon '+(w.type==='buy'?'buy':'sell')+'">'+(w.type==='buy'?'🐳':'🚨')+'</div>'+
+        '<div class="whale-body">'+
+        '<div class="whale-title"><span style="font-size:9px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;margin-right:6px">'+(w.chain_icon||'')+' '+(w.chain_name||w.chain)+'</span>'+
+        '<strong>'+w.symbol+'</strong> — '+fa(w.amount)+' '+w.symbol+' <span style="color:'+(w.type==='buy'?'var(--green)':'var(--red)')+';">'+(w.type==='buy'?'▲ BUY':'▼ SELL')+'</span></div>'+
+        '<div class="whale-meta"><span class="whale-time">⏱ '+ta(w.timestamp)+'</span>'+
+        '<span class="whale-tag '+(w.type==='buy'?'smart':'risk')+'">'+(w.type==='buy'?'SMART MONEY':'WHALE EXIT')+'</span></div></div></div>'
+      ).join('')}
+    </div>`;
 }
 
 async function loadChainStats(){
   const d=await fetch(API+'/api/chains').then(r=>r.json()).catch(()=>({}));
   const el=document.getElementById('chainStats');if(!el)return;
-  const chains=[
-    {key:'ethereum',icon:'⟠',name:'ETH',color:'#627eea'},
-    {key:'bnb',icon:'🟡',name:'BNB',color:'#f3ba2f'},
-    {key:'base',icon:'🔵',name:'BASE',color:'#0052ff'},
-    {key:'arbitrum',icon:'🔷',name:'ARB',color:'#28a0f0'},
-    {key:'polygon',icon:'🟣',name:'POL',color:'#9945ff'},
-    {key:'solana',icon:'🟣',name:'SOL',color:'#14f195'},
-  ];
+  const chains=[{key:'ethereum',icon:'⟠',name:'ETH',color:'#627eea'},{key:'bnb',icon:'🟡',name:'BNB',color:'#f3ba2f'},{key:'base',icon:'🔵',name:'BASE',color:'#0052ff'},{key:'arbitrum',icon:'🔷',name:'ARB',color:'#28a0f0'},{key:'polygon',icon:'🟣',name:'POL',color:'#9945ff'},{key:'solana',icon:'🟣',name:'SOL',color:'#14f195'}];
   el.innerHTML=chains.map(c=>{
     const info=d[c.key]||{count:0};
     return'<div class="stat-card" style="padding:12px;cursor:pointer;text-align:center" onclick="loadWhales(\''+c.key+'\')">'+
     '<div style="font-size:20px;margin-bottom:4px">'+c.icon+'</div>'+
-    '<div style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:'+c.color+'">'+( info.count||0)+'</div>'+
-    '<div style="font-size:10px;color:var(--muted)">'+c.name+' Whales</div></div>';
+    '<div style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:'+c.color+'">'+(info.count||0)+'</div>'+
+    '<div style="font-size:10px;color:var(--muted)">'+c.name+'</div></div>';
   }).join('');
 }
 
@@ -690,35 +739,117 @@ async function loadWhales(chain){
   const activeBtn=document.getElementById('filter-'+chain);
   if(activeBtn)activeBtn.className='btn btn-primary btn-sm';
   const el=document.getElementById('whaleContent');if(!el)return;
-  el.innerHTML='<div class="loading"><div class="spinner"></div>Loading '+chain+' whales...</div>';
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
   let whales=[];
-  if(chain==='all'){
-    const d=await fetch(API+'/api/whales').then(r=>r.json()).catch(()=>({whales:[]}));
-    whales=d.whales||[];
-  }else{
-    const d=await fetch(API+'/api/whales/'+chain).then(r=>r.json()).catch(()=>({whales:[]}));
-    whales=d.whales||[];
-  }
-  if(!whales.length){el.innerHTML='<div class="card" style="padding:30px;text-align:center;color:var(--muted)">No whale data for '+chain+'.</div>';return;}
-  el.innerHTML='<div class="card"><div class="card-header"><div class="card-title"><div class="live-dot"></div>'+
-  (chain==='all'?'All Chain Whale Transactions':chain.toUpperCase()+' Whale Transactions')+
-  '</div><span style="font-size:10px;color:var(--green)">'+whales.length+' TXs</span></div>'+
+  if(chain==='all'){const d=await fetch(API+'/api/whales').then(r=>r.json()).catch(()=>({whales:[]}));whales=d.whales||[];}
+  else{const d=await fetch(API+'/api/whales/'+chain).then(r=>r.json()).catch(()=>({whales:[]}));whales=d.whales||[];}
+  if(!whales.length){el.innerHTML='<div class="card" style="padding:30px;text-align:center;color:var(--muted)">No data for '+chain+'.</div>';return;}
+  el.innerHTML='<div class="card"><div class="card-header"><div class="card-title"><div class="live-dot"></div>'+(chain==='all'?'All Chains':''+chain.toUpperCase())+' Whales</div><span style="font-size:10px;color:var(--green)">'+whales.length+' TXs</span></div>'+
   whales.map(w=>
     '<div class="whale-item" onclick="window.open(\''+w.etherscan_url+'\',\'_blank\')">'+
     '<div class="whale-type-icon '+(w.type==='buy'?'buy':'sell')+'">'+(w.type==='buy'?'🐳':'🚨')+'</div>'+
     '<div class="whale-body">'+
-    '<div class="whale-title">'+
-    '<span style="font-size:9px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;margin-right:6px">'+(w.chain_icon||'')+' '+(w.chain_name||w.chain)+'</span>'+
-    '<strong>'+w.symbol+'</strong> — '+fa(w.amount)+' '+w.symbol+
-    ' <span style="color:'+(w.type==='buy'?'var(--green)':'var(--red)')+';">'+(w.type==='buy'?'▲ BUY':'▼ SELL')+'</span></div>'+
+    '<div class="whale-title"><span style="font-size:9px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;margin-right:6px">'+(w.chain_icon||'')+' '+(w.chain_name||w.chain)+'</span>'+
+    '<strong>'+w.symbol+'</strong> — '+fa(w.amount)+' '+w.symbol+' <span style="color:'+(w.type==='buy'?'var(--green)':'var(--red)')+';">'+(w.type==='buy'?'▲ BUY':'▼ SELL')+'</span></div>'+
     '<div style="font-size:11px;color:var(--accent);margin-top:2px">'+(w.token_name||'')+'</div>'+
-    '<div class="whale-meta">'+
-    '<span class="whale-time">⏱ '+ta(w.timestamp)+'</span>'+
+    '<div class="whale-meta"><span class="whale-time">⏱ '+ta(w.timestamp)+'</span>'+
     '<span style="font-size:10px;color:var(--muted)">'+w.from+' → '+w.to+'</span>'+
-    '<span class="whale-tag '+(w.type==='buy'?'smart':'risk')+'">'+(w.type==='buy'?'SMART MONEY':'WHALE EXIT')+'</span>'+
-    '</div></div>'+
+    '<span class="whale-tag '+(w.type==='buy'?'smart':'risk')+'">'+(w.type==='buy'?'SMART MONEY':'WHALE EXIT')+'</span></div></div>'+
     '<div style="font-size:9px;color:var(--accent)">🔗</div></div>'
   ).join('')+'</div>';
+  bump();
+}
+
+// ========== ANALYTICS PAGE ==========
+async function renderAnalytics(){
+  document.getElementById('mainContent').innerHTML=`
+    <div class="page-header">
+      <div><div class="page-title">📊 <span>Analytics</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Historical whale data & market analysis</div></div>
+      <button class="btn btn-primary" onclick="loadAnalytics()">⟳ Refresh</button>
+    </div>
+    <div class="realtime-bar"><div class="realtime-dot"></div>HISTORICAL ANALYTICS<span class="last-update" id="lastUpdate">Loading...</span></div>
+    <div id="analyticsContent"><div class="loading"><div class="spinner"></div>Loading analytics...</div></div>`;
+  await loadAnalytics();
+}
+
+async function loadAnalytics(){
+  const d=await fetch(API+'/api/analytics').then(r=>r.json()).catch(()=>({summary:{},top_symbols:[],chain_distribution:{}}));
+  const s=d.summary||{},symbols=d.top_symbols||[],chainDist=d.chain_distribution||{};
+  const el=document.getElementById('analyticsContent');if(!el)return;
+
+  const chainColors={ethereum:'#627eea',bnb:'#f3ba2f',base:'#0052ff',arbitrum:'#28a0f0',polygon:'#9945ff',solana:'#14f195'};
+  const chainIcons={ethereum:'⟠',bnb:'🟡',base:'🔵',arbitrum:'🔷',polygon:'🟣',solana:'🟣'};
+
+  el.innerHTML=`
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">🔢</div>
+        <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--accent)">${s.total_transactions||0}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Total Transactions</div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">🐳</div>
+        <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--green)">${s.total_buys||0}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Smart Money Buys</div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">🚨</div>
+        <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--red)">${s.total_sells||0}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Whale Exits</div>
+      </div>
+      <div class="analytics-card">
+        <div style="font-size:28px;margin-bottom:8px">📈</div>
+        <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:${(s.buy_ratio||0)>50?'var(--green)':'var(--red)'}">${s.buy_ratio||0}%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Buy Ratio</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔥 Most Active Tokens</div></div>
+        ${symbols.map((item,i)=>{
+          const total=item.buys+item.sells;
+          const buyRatio=Math.round(item.buys/total*100)||0;
+          return'<div style="padding:12px 20px;border-bottom:1px solid rgba(30,45,69,.5)">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+          '<div style="display:flex;align-items:center;gap:8px">'+
+          '<div style="font-size:11px;color:var(--dim);width:20px">'+(i+1)+'</div>'+
+          '<div class="token-avatar" style="'+ac(item.symbol)+';width:28px;height:28px;font-size:12px">'+item.symbol[0]+'</div>'+
+          '<div style="font-size:12px;font-weight:600">'+item.symbol+'</div></div>'+
+          '<div style="font-size:11px;color:var(--muted)">'+total+' txs</div></div>'+
+          '<div style="display:flex;gap:4px;align-items:center">'+
+          '<div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">'+
+          '<div style="width:'+buyRatio+'%;height:100%;background:var(--green);border-radius:3px"></div></div>'+
+          '<span style="font-size:10px;color:var(--green);min-width:30px">'+item.buys+'▲</span>'+
+          '<span style="font-size:10px;color:var(--red);min-width:30px">'+item.sells+'▼</span>'+
+          '</div></div>';
+        }).join('')}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">🌐 Chain Distribution</div></div>
+        <div style="padding:16px 20px">
+          ${Object.entries(chainDist).map(([chain,count])=>{
+            const total=Object.values(chainDist).reduce((a,b)=>a+b,0)||1;
+            const pct=Math.round(count/total*100);
+            const color=chainColors[chain]||'#64748b';
+            const icon=chainIcons[chain]||'🔗';
+            return'<div style="margin-bottom:14px">'+
+            '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
+            '<span style="font-size:11px">'+icon+' '+chain.toUpperCase()+'</span>'+
+            '<span style="font-size:11px;color:'+color+'">'+count+' ('+pct+'%)</span></div>'+
+            '<div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">'+
+            '<div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:3px"></div></div></div>';
+          }).join('')}
+        </div>
+
+        <div class="card-header" style="border-top:1px solid var(--border)"><div class="card-title">🧠 Market Overview</div></div>
+        <div style="padding:16px 20px">
+          ${[{label:'Market Sentiment',val:s.market_sentiment||'—',color:'var(--yellow)'},{label:'Fear & Greed',val:(s.fear_greed||0)+'/100',color:(s.fear_greed||0)>60?'var(--green)':(s.fear_greed||0)<40?'var(--red)':'var(--yellow)'},{label:'Chains Tracked',val:s.chains_tracked||6,color:'var(--accent)'},{label:'Smart Money Signal',val:(s.buy_ratio||0)>55?'BULLISH':(s.buy_ratio||0)<45?'BEARISH':'NEUTRAL',color:(s.buy_ratio||0)>55?'var(--green)':(s.buy_ratio||0)<45?'var(--red)':'var(--yellow)'}].map(r=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,45,69,.5)"><span style="font-size:11px;color:var(--muted)">${r.label}</span><span style="font-size:11px;font-weight:600;color:${r.color}">${r.val}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
   bump();
 }
 
@@ -763,12 +894,7 @@ function renderScam(){
     '<div class="input-row"><input class="addr-input" id="addrInput" placeholder="0x... contract address"><button class="btn btn-primary" onclick="analyzeContract()">⚡ AI Analyze</button></div>'+
     '<div id="detResult" style="margin-top:16px;display:none"></div></div>'+
     '<div class="card"><div class="card-header"><div class="card-title">🚨 Known Risk Patterns</div></div>'+
-    [{icon:'🍯',name:'Honeypot Contract',desc:'Buy করা যায় কিন্তু sell হয় না',level:'critical'},
-     {icon:'💧',name:'Unlocked Liquidity',desc:'Dev যেকোনো সময় তুলে নিতে পারে',level:'high'},
-     {icon:'👑',name:'Mint Authority',desc:'Unlimited token mint করতে পারে',level:'high'},
-     {icon:'🔄',name:'High Tax',desc:'Tax 10%+ — pump & dump risk',level:'medium'},
-     {icon:'👥',name:'Concentrated Holdings',desc:'Top wallets 80%+ tokens hold',level:'medium'},
-    ].map(r=>'<div class="risk-item"><div class="risk-icon">'+r.icon+'</div><div class="risk-body"><div class="risk-name">'+r.name+'</div><div class="risk-desc">'+r.desc+'</div></div><div class="risk-level '+r.level+'">'+r.level.toUpperCase()+'</div></div>').join('')+'</div>';
+    [{icon:'🍯',name:'Honeypot Contract',desc:'Buy করা যায় কিন্তু sell হয় না',level:'critical'},{icon:'💧',name:'Unlocked Liquidity',desc:'Dev যেকোনো সময় তুলে নিতে পারে',level:'high'},{icon:'👑',name:'Mint Authority',desc:'Unlimited token mint করতে পারে',level:'high'},{icon:'🔄',name:'High Tax',desc:'Tax 10%+ — pump & dump risk',level:'medium'},{icon:'👥',name:'Concentrated Holdings',desc:'Top wallets 80%+ tokens hold',level:'medium'}].map(r=>'<div class="risk-item"><div class="risk-icon">'+r.icon+'</div><div class="risk-body"><div class="risk-name">'+r.name+'</div><div class="risk-desc">'+r.desc+'</div></div><div class="risk-level '+r.level+'">'+r.level.toUpperCase()+'</div></div>').join('')+'</div>';
 }
 
 async function analyzeContract(){
@@ -799,10 +925,8 @@ async function analyzeContract(){
 // ========== TRENDING ==========
 async function renderTrending(){
   document.getElementById('mainContent').innerHTML=`
-    <div class="page-header">
-      <div><div class="page-title">🔥 <span>Trending</span></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">DexScreener + CoinGecko + Market Cap</div></div>
-    </div>
+    <div class="page-header"><div><div class="page-title">🔥 <span>Trending</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">DexScreener + CoinGecko + Market Cap</div></div></div>
     <div class="realtime-bar"><div class="realtime-dot"></div>LIVE TRENDING<span class="last-update" id="lastUpdate">Loading...</span></div>
     <div style="display:flex;gap:8px;margin-bottom:20px">
       <button class="btn btn-primary btn-sm" onclick="loadTrendingTab('dex')" id="tab-dex">🔥 DexScreener</button>
@@ -815,16 +939,12 @@ async function renderTrending(){
   pageTimer=setInterval(()=>{if(currentPage==='trending')loadTrendingTab(currentTrendTab);},120000);
 }
 
-let currentTrendTab='dex';
-
 async function loadTrendingTab(tab){
   currentTrendTab=tab;
   document.querySelectorAll('[id^="tab-"]').forEach(b=>b.className='btn btn-outline btn-sm');
   document.getElementById('tab-'+tab).className='btn btn-primary btn-sm';
-
   const el=document.getElementById('trendContent');if(!el)return;
   el.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-
   const chainIcon={solana:'🟣',bsc:'🟡',ethereum:'⟠',base:'🔵',arbitrum:'🔷',polygon:'🟣'};
 
   if(tab==='dex'){
@@ -834,8 +954,7 @@ async function loadTrendingTab(tab){
     el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">🔥 DexScreener Boosted Tokens</div><span style="font-size:10px;color:var(--green)">LIVE</span></div>'+
     trending.map((t,i)=>{
       const chain=t.chainId||'solana',icon=chainIcon[chain]||'🔗',desc=(t.description||'').slice(0,100);
-      const twitter=t.links?.find(l=>l.type==='twitter');
-      const telegram=t.links?.find(l=>l.type==='telegram');
+      const twitter=t.links?.find(l=>l.type==='twitter'),telegram=t.links?.find(l=>l.type==='telegram');
       return'<div class="social-item" onclick="window.open(\''+t.url+'\',\'_blank\')">'+
       '<div style="display:flex;align-items:flex-start;gap:10px">'+
       '<div style="font-size:12px;color:var(--dim);width:24px;margin-top:2px">'+(i+1)+'</div>'+
@@ -860,30 +979,26 @@ async function loadTrendingTab(tab){
       '<div style="font-size:12px;color:var(--dim);width:24px">'+(i+1)+'</div>'+
       '<div class="token-avatar" style="'+ac(p.symbol||'C')+'">'+( p.symbol||'C')[0].toUpperCase()+'</div>'+
       '<div style="flex:1">'+
-      '<div style="font-size:12px;font-weight:600;color:var(--text)">'+p.title.replace(' trending on CoinGecko','')+'</div>'+
+      '<div style="font-size:12px;font-weight:600">'+p.title.replace(' trending on CoinGecko','')+'</div>'+
       '<div style="display:flex;gap:8px;margin-top:4px">'+
       (p.symbol?'<span style="font-size:10px;color:var(--accent)">$'+p.symbol+'</span>':'')+
       '<span style="font-size:9px;background:rgba(0,255,136,.1);color:var(--green);padding:2px 6px;border-radius:4px">'+p.sentiment+'</span>'+
-      '</div></div>'+
-      '<div style="font-size:9px;color:var(--accent)">→</div>'+
-      '</div></div>'
+      '</div></div><div style="font-size:9px;color:var(--accent)">→</div></div></div>'
     ).join('')+'</div>';
 
   }else if(tab==='market'){
     const d=await fetch(API+'/api/top-tokens').then(r=>r.json()).catch(()=>({tokens:[]}));
     const tokens=d.tokens||[];
     if(!tokens.length){el.innerHTML='<div class="card" style="padding:30px;text-align:center;color:var(--muted)">No market data.</div>';return;}
-    el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">🏆 Top Tokens by Market Cap</div><span style="font-size:10px;color:var(--muted)">CoinGecko Live</span></div>'+
+    el.innerHTML='<div class="card"><div class="card-header"><div class="card-title">🏆 Top by Market Cap</div></div>'+
     tokens.map((t,i)=>{
       const chg=t.price_change_percentage_24h||0;
       return'<div class="top-token-item">'+
       '<div style="font-size:11px;color:var(--dim);width:24px">'+(i+1)+'</div>'+
       '<div class="token-avatar" style="'+ac(t.symbol)+'">'+t.symbol[0].toUpperCase()+'</div>'+
-      '<div style="flex:1">'+
-      '<div style="font-size:13px;font-weight:500">'+t.name+'</div>'+
-      '<div style="font-size:10px;color:var(--muted)">'+t.symbol.toUpperCase()+' • MCap: '+fv(t.market_cap)+'</div></div>'+
-      '<div style="text-align:right">'+
-      '<div style="font-size:13px;font-weight:500">$'+fp(t.current_price)+'</div>'+
+      '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+t.name+'</div>'+
+      '<div style="font-size:10px;color:var(--muted)">'+t.symbol.toUpperCase()+' • '+fv(t.market_cap)+'</div></div>'+
+      '<div style="text-align:right"><div style="font-size:13px">$'+fp(t.current_price)+'</div>'+
       '<div style="font-size:10px;color:'+(chg>=0?'var(--green)':'var(--red)')+'">'+(chg>=0?'▲':'▼')+Math.abs(chg).toFixed(1)+'%</div></div></div>';
     }).join('')+'</div>';
   }
@@ -896,20 +1011,15 @@ function removeFromWatchlist(sym){watchlist=watchlist.filter(s=>s!==sym);localSt
 function renderWatchlist(){
   stopTimer();
   document.getElementById('mainContent').innerHTML='<div class="page-header"><div class="page-title">⭐ My <span>Watchlist</span></div></div>'+
-  (watchlist.length===0?
-    '<div class="card" style="padding:50px;text-align:center"><div style="font-size:32px;margin-bottom:12px">⭐</div><div style="color:var(--muted)">Empty। Token এ click করে add করো।</div></div>':
-    '<div class="card"><div class="card-header"><div class="card-title">Saved Tokens ('+watchlist.length+')</div></div>'+
-    watchlist.map((sym,i)=>'<div class="token-row" style="grid-template-columns:36px 1fr 100px">'+
-    '<div class="token-rank">'+(i+1)+'</div>'+
-    '<div class="token-info"><div class="token-avatar" style="'+ac(sym)+'">'+sym[0]+'</div>'+
-    '<div class="token-name">'+sym+'</div></div>'+
-    '<button class="btn btn-outline" style="padding:4px 10px;font-size:10px" onclick="removeFromWatchlist(\''+sym+'\')">Remove</button></div>').join('')+'</div>');
+  (watchlist.length===0?'<div class="card" style="padding:50px;text-align:center"><div style="font-size:32px;margin-bottom:12px">⭐</div><div style="color:var(--muted)">Empty। Token এ click করে add করো।</div></div>':
+  '<div class="card"><div class="card-header"><div class="card-title">Saved Tokens ('+watchlist.length+')</div></div>'+
+  watchlist.map((sym,i)=>'<div class="token-row" style="grid-template-columns:36px 1fr 100px">'+
+  '<div class="token-rank">'+(i+1)+'</div>'+
+  '<div class="token-info"><div class="token-avatar" style="'+ac(sym)+'">'+sym[0]+'</div>'+
+  '<div class="token-name">'+sym+'</div></div>'+
+  '<button class="btn btn-outline" style="padding:4px 10px;font-size:10px" onclick="removeFromWatchlist(\''+sym+'\')">Remove</button></div>').join('')+'</div>');
 }
 
-function setMobileActive(el){
-  document.querySelectorAll('.mobile-nav-item').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');
-}
 function showToast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:90px;right:24px;background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:10px 16px;border-radius:10px;font-size:12px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4)';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
 function toggleChat(){const c=document.getElementById('aiChat'),f=document.getElementById('fab'),o=c.classList.toggle('open');f.style.display=o?'none':'flex';}
 async function sendChat(){
