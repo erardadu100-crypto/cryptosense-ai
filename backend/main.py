@@ -373,6 +373,13 @@ async def get_contract_info(address):
         "is_proxy": r.get("Proxy", "0") == "1",
     }
 
+async def keep_alive():
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            await client.get("https://cryptosense-ai-backend.onrender.com/")
+            print("✓ Keep alive ping sent")
+    except:
+        pass
 async def preload():
     print("⚡ Preloading all data...")
     await asyncio.gather(
