@@ -221,7 +221,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="nav-item" onclick="showPage('signals')"><span class="nav-icon">🤖</span>AI Signals</div>
     <div class="nav-item" onclick="showPage('whales')"><span class="nav-icon">🐳</span>Whale Tracker</div>
     <div class="nav-item" onclick="showPage('analytics')"><span class="nav-icon">📊</span>Analytics</div>
-  </div>
+  <div class="nav-item" onclick="showPage('coinsignal')"><span class="nav-icon">🎯</span>Coin Signal</ div>
+ </div>
   <div class="nav-section">
     <div class="nav-section-label">Tools</div>
     <div class="nav-item" onclick="showPage('scanner')"><span class="nav-icon">🔍</span>Token Scanner</div>
@@ -316,7 +317,7 @@ function showPage(page){
   document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
   const map={dashboard:0,signals:1,whales:2,analytics:3,scanner:4,scam:5,trending:6,watchlist:7};
   document.querySelectorAll('.nav-item')[map[page]]?.classList.add('active');
-  ({dashboard:renderDashboard,signals:renderSignals,whales:renderWhales,analytics:renderAnalytics,scanner:renderScanner,scam:renderScam,trending:renderTrending,watchlist:renderWatchlist})[page]?.();
+  ({dashboard:renderDashboard,signals:renderSignals,whales:renderWhales,analytics:renderAnalytics,coinsignal:renderCoinSignal, ,scanner:renderScanner,scam:renderScam,trending:renderTrending,watchlist:renderWatchlist})[page]?.();
 }
 
 // ========== TOKEN DETAIL ==========
@@ -1008,6 +1009,161 @@ async function loadTrendingTab(tab){
 // ========== WATCHLIST ==========
 function addToWatchlist(sym){if(!watchlist.includes(sym)){watchlist.push(sym);localStorage.setItem('watchlist',JSON.stringify(watchlist));showToast('⭐ '+sym+' added!');}}
 function removeFromWatchlist(sym){watchlist=watchlist.filter(s=>s!==sym);localStorage.setItem('watchlist',JSON.stringify(watchlist));renderWatchlist();}
+async function renderCoinSignal(){
+  document.getElementById('mainContent').innerHTML=`
+    <div class="page-header">
+      <div><div class="page-title">🎯 Coin <span>Signal</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">FOW Analysis — Smart Money Concepts (SMC) Based Signals</div></div>
+      <button class="btn btn-primary" onclick="loadCoinSignals()">⟳ Refresh</button>
+    </div>
+    <div class="realtime-bar"><div class="realtime-dot"></div>FOW ENGINE ACTIVE — BOS • CHoCH • OB • FVG • Liquidity<span class="last-update" id="lastUpdate">Loading...</span></div>
+    <div id="signalStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="filterSignals('all')" id="sf-all">🌐 All</button>
+      <button class="btn btn-outline btn-sm" onclick="filterSignals('STRONG BUY')" id="sf-sb">🚀 Strong Buy</button>
+      <button class="btn btn-outline btn-sm" onclick="filterSignals('BUY')" id="sf-buy">📈 Buy</button>
+      <button class="btn btn-outline btn-sm" onclick="filterSignals('NEUTRAL')" id="sf-neutral">⚖️ Neutral</button>
+      <button class="btn btn-outline btn-sm" onclick="filterSignals('SELL')" id="sf-sell">📉 Sell</button>
+      <button class="btn btn-outline btn-sm" onclick="filterSignals('STRONG SELL')" id="sf-ss">🔴 Strong Sell</button>
+    </div>
+    <div id="signalContent"><div class="loading"><div class="spinner"></div>Running FOW Analysis...</div></div>`;
+  await loadCoinSignals();
+  stopTimer();
+  pageTimer=setInterval(()=>{if(currentPage==='coinsignal')loadCoinSignals();},30000);
+}
+
+let allSignals=[];
+let currentSignalFilter='all';
+
+async function loadCoinSignals(){
+  const d=await fetch(API+'/api/coin-signals').then(r=>r.json()).catch(()=>({signals:[],total:0,bullish:0,bearish:0,neutral:0}));
+  allSignals=d.signals||[];
+
+  // Stats
+  const statsEl=document.getElementById('signalStats');
+  if(statsEl){
+    statsEl.innerHTML=
+      '<div class="stat-card"><span class="stat-icon">🎯</span><div class="stat-label">Total Analyzed</div><div class="stat-value" style="color:var(--accent)">'+(d.total||0)+'</div><div class="stat-change up">FOW Active</div></div>'+
+      '<div class="stat-card"><span class="stat-icon">🚀</span><div class="stat-label">Bullish Signals</div><div class="stat-value" style="color:var(--green)">'+(d.bullish||0)+'</div><div class="stat-change up">▲ Buy Zone</div></div>'+
+      '<div class="stat-card"><span class="stat-icon">🔴</span><div class="stat-label">Bearish Signals</div><div class="stat-value" style="color:var(--red)">'+(d.bearish||0)+'</div><div class="stat-change dn">▼ Sell Zone</div></div>'+
+      '<div class="stat-card"><span class="stat-icon">⚖️</span><div class="stat-label">Market Bias</div><div class="stat-value" style="color:'+(d.bullish>d.bearish?'var(--green)':'var(--red))+'">'+(d.bullish>d.bearish?'BULLISH':'BEARISH')+'</div><div class="stat-change" style="color:var(--muted)">SMC Analysis</div></div>';
+  }
+
+  filterSignals(currentSignalFilter);
+  bump();
+}
+
+function filterSignals(filter){
+  currentSignalFilter=filter;
+  document.querySelectorAll('[id^="sf-"]').forEach(b=>b.className='btn btn-outline btn-sm');
+  const activeId={all:'sf-all','STRONG BUY':'sf-sb',BUY:'sf-buy',NEUTRAL:'sf-neutral',SELL:'sf-sell','STRONG SELL':'sf-ss'}[filter];
+  if(activeId)document.getElementById(activeId).className='btn btn-primary btn-sm';
+
+  const filtered=filter==='all'?allSignals:allSignals.filter(s=>s.signal===filter);
+  renderSignalCards(filtered);
+}
+
+function renderSignalCards(signals){
+  const el=document.getElementById('signalContent');if(!el)return;
+  if(!signals.length){el.innerHTML='<div class="card" style="padding:30px;text-align:center;color:var(--muted)">No signals found.</div>';return;}
+
+  el.innerHTML=signals.map(s=>{
+    const signalColors={'STRONG BUY':'#00ff88','BUY':'#00d4ff','NEUTRAL':'#ffb800','SELL':'#ff6b35','STRONG SELL':'#ff3b5c'};
+    const signalBg={'STRONG BUY':'rgba(0,255,136,0.1)','BUY':'rgba(0,212,255,0.1)','NEUTRAL':'rgba(255,184,0,0.1)','SELL':'rgba(255,107,53,0.1)','STRONG SELL':'rgba(255,59,92,0.1)'};
+    const color=signalColors[s.signal]||'#64748b';
+    const bg=signalBg[s.signal]||'rgba(100,116,139,0.1)';
+    const chainIcon={ethereum:'⟠',solana:'🟣',bsc:'🟡',base:'🔵',arbitrum:'🔷',polygon:'🟣'};
+    const icon=chainIcon[s.chain]||'🔗';
+
+    return`<div class="card" style="cursor:pointer" onclick="window.open('${s.dex_url}','_blank')">
+      <div style="padding:20px">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div class="token-avatar" style="${ac(s.symbol)};width:44px;height:44px;font-size:18px">${s.symbol[0]}</div>
+          <div style="flex:1">
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">${s.symbol}</div>
+            <div style="font-size:10px;color:var(--muted)">${icon} ${s.chain?.toUpperCase()} • $${fp(s.price)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="background:${bg};color:${color};padding:6px 14px;border-radius:8px;font-size:12px;font-weight:800;border:1px solid ${color}">${s.signal}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">Confidence: ${s.confidence}</div>
+          </div>
+        </div>
+
+        <!-- FOW Score Bar -->
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:11px;color:var(--muted)">FOW Score</span>
+            <span style="font-size:11px;font-weight:800;color:${color}">${s.fow_score}/100</span>
+          </div>
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="width:${s.fow_score}%;height:100%;background:linear-gradient(90deg,${color},${color}88);border-radius:4px;transition:width 1s ease"></div>
+          </div>
+        </div>
+
+        <!-- SMC Patterns -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+          ${s.smc_patterns.map(p=>`<span style="font-size:9px;padding:3px 8px;border-radius:4px;background:rgba(124,58,237,0.15);color:#a78bfa;font-weight:600">${p.replace(/_/g,' ')}</span>`).join('')}
+        </div>
+
+        <!-- Signals -->
+        <div style="margin-bottom:16px">
+          ${s.signals.slice(0,3).map(sig=>`<div style="font-size:11px;color:var(--text);padding:3px 0">${sig}</div>`).join('')}
+        </div>
+
+        <!-- Stats Row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">WHALE BIAS</div>
+            <div style="font-size:13px;font-weight:700;color:${s.whale_buy_ratio>50?'var(--green)':'var(--red)'}">${s.whale_buy_ratio}% BUY</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">BUY PRESSURE</div>
+            <div style="font-size:13px;font-weight:700;color:${s.buy_pressure>50?'var(--green)':'var(--red)'}">${s.buy_pressure}%</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:4px">VOL RATIO</div>
+            <div style="font-size:13px;font-weight:700;color:${s.volume_ratio>1.5?'var(--green)':'var(--muted)'}">${s.volume_ratio}x</div>
+          </div>
+        </div>
+
+        <!-- Entry/SL/TP -->
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:10px;letter-spacing:.1em">TRADE SETUP</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:9px;color:var(--muted)">Entry Zone</div>
+              <div style="font-size:12px;font-weight:600;color:var(--accent)">$${fp(s.entry_zone)}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted)">Stop Loss</div>
+              <div style="font-size:12px;font-weight:600;color:var(--red)">$${fp(s.stop_loss)}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted)">TP1 (+5%)</div>
+              <div style="font-size:12px;font-weight:600;color:var(--green)">$${fp(s.tp1)}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted)">TP2 (+12%)</div>
+              <div style="font-size:12px;font-weight:600;color:var(--green)">$${fp(s.tp2)}</div>
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <div style="font-size:9px;color:var(--muted)">TP3 (+20%) 🎯</div>
+            <div style="font-size:13px;font-weight:700;color:var(--green)">$${fp(s.tp3)}</div>
+          </div>
+        </div>
+
+        <!-- 24h change -->
+        <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:11px">
+          <span style="color:var(--muted)">24h: <span style="color:${s.change_24h>=0?'var(--green)':'var(--red)'}">${s.change_24h>=0?'▲':'▼'}${Math.abs(s.change_24h).toFixed(1)}%</span></span>
+          <span style="color:var(--muted)">1h: <span style="color:${s.change_1h>=0?'var(--green)':'var(--red)'}">${s.change_1h>=0?'▲':'▼'}${Math.abs(s.change_1h).toFixed(1)}%</span></span>
+          <span style="color:var(--muted)">Liq: <span style="color:var(--accent)">${fv(s.liquidity)}</span></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 function renderWatchlist(){
   stopTimer();
   document.getElementById('mainContent').innerHTML='<div class="page-header"><div class="page-title">⭐ My <span>Watchlist</span></div></div>'+
