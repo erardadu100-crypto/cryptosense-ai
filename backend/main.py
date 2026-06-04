@@ -380,6 +380,177 @@ async def keep_alive():
             print("✓ Keep alive ping sent")
     except:
         pass
+def calculate_fow_analysis(pair: dict, whales: list) -> dict:
+    """Flow of Whales — SMC based signal generator"""
+    
+    sym = pair.get("baseToken", {}).get("symbol", "???")
+    price = float(pair.get("priceUsd", 0) or 0)
+    vol_24h = float(pair.get("volume", {}).get("h24", 0) or 0)
+    vol_1h = float(pair.get("volume", {}).get("h1", 0) or 0)
+    vol_6h = float(pair.get("volume", {}).get("h6", 0) or 0)
+    liq = float(pair.get("liquidity", {}).get("usd", 0) or 0)
+    chg_5m = float(pair.get("priceChange", {}).get("m5", 0) or 0)
+    chg_1h = float(pair.get("priceChange", {}).get("h1", 0) or 0)
+    chg_6h = float(pair.get("priceChange", {}).get("h6", 0) or 0)
+    chg_24h = float(pair.get("priceChange", {}).get("h24", 0) or 0)
+    buys_24h = int(pair.get("txns", {}).get("h24", {}).get("buys", 0) or 0)
+    sells_24h = int(pair.get("txns", {}).get("h24", {}).get("sells", 0) or 0)
+    buys_1h = int(pair.get("txns", {}).get("h1", {}).get("buys", 0) or 0)
+    sells_1h = int(pair.get("txns", {}).get("h1", {}).get("sells", 0) or 0)
+
+    # FOW Score calculation
+    fow_score = 50
+    signals = []
+    smc_patterns = []
+
+    # 1. WHALE FLOW ANALYSIS
+    whale_buys = sum(1 for w in whales if w.get("type") == "buy")
+    whale_sells = sum(1 for w in whales if w.get("type") == "sell")
+    whale_total = whale_buys + whale_sells or 1
+    whale_buy_ratio = whale_buys / whale_total
+
+    if whale_buy_ratio > 0.7:
+        fow_score += 20
+        signals.append("🐳 Smart money heavily accumulating")
+        smc_patterns.append("INSTITUTIONAL_BUY")
+    elif whale_buy_ratio > 0.55:
+        fow_score += 10
+        signals.append("🐳 Smart money buying pressure")
+        smc_patterns.append("SMART_MONEY_ENTRY")
+    elif whale_buy_ratio < 0.3:
+        fow_score -= 20
+        signals.append("🚨 Whales distributing — exit signal")
+        smc_patterns.append("DISTRIBUTION_ZONE")
+    elif whale_buy_ratio < 0.45:
+        fow_score -= 10
+        signals.append("⚠️ Whale selling pressure detected")
+        smc_patterns.append("BEARISH_FLOW")
+
+    # 2. SMC — BREAK OF STRUCTURE (BOS)
+    if chg_1h > 3 and chg_6h > 5 and vol_1h > vol_6h / 6:
+        fow_score += 15
+        signals.append("📈 BOS — Bullish Break of Structure confirmed")
+        smc_patterns.append("BOS_BULLISH")
+    elif chg_1h < -3 and chg_6h < -5:
+        fow_score -= 15
+        signals.append("📉 BOS — Bearish Break of Structure")
+        smc_patterns.append("BOS_BEARISH")
+
+    # 3. SMC — CHANGE OF CHARACTER (CHoCH)
+    if chg_5m > 2 and chg_1h < 0:
+        fow_score += 10
+        signals.append("🔄 CHoCH — Potential reversal forming")
+        smc_patterns.append("CHOCH_BULLISH")
+    elif chg_5m < -2 and chg_1h > 0:
+        fow_score -= 10
+        signals.append("🔄 CHoCH — Bearish reversal signal")
+        smc_patterns.append("CHOCH_BEARISH")
+
+    # 4. VOLUME ANALYSIS (Order Block confirmation)
+    vol_ratio = vol_1h / (vol_24h / 24) if vol_24h > 0 else 1
+    if vol_ratio > 3:
+        fow_score += 15
+        signals.append("🔥 Volume spike 3x — Order Block activated")
+        smc_patterns.append("ORDER_BLOCK_ACTIVE")
+    elif vol_ratio > 2:
+        fow_score += 8
+        signals.append("📊 Volume surge — Strong interest")
+        smc_patterns.append("HIGH_VOLUME")
+    elif vol_ratio < 0.5:
+        fow_score -= 8
+        signals.append("😴 Low volume — Weak momentum")
+        smc_patterns.append("LOW_VOLUME")
+
+    # 5. BUY/SELL PRESSURE (FVG Detection)
+    total_txns_1h = buys_1h + sells_1h or 1
+    buy_pressure_1h = buys_1h / total_txns_1h
+    if buy_pressure_1h > 0.7 and chg_1h > 0:
+        fow_score += 12
+        signals.append("💚 FVG filled — Strong buy pressure")
+        smc_patterns.append("FVG_BULLISH")
+    elif buy_pressure_1h < 0.3 and chg_1h < 0:
+        fow_score -= 12
+        signals.append("🔴 FVG bearish — Sell pressure dominant")
+        smc_patterns.append("FVG_BEARISH")
+
+    # 6. LIQUIDITY ANALYSIS
+    if liq > 500000 and chg_24h > 0:
+        fow_score += 10
+        signals.append("💎 Deep liquidity + uptrend — Safe entry")
+        smc_patterns.append("LIQUIDITY_STRONG")
+    elif liq < 50000:
+        fow_score -= 15
+        signals.append("⚠️ Low liquidity — High manipulation risk")
+        smc_patterns.append("LIQUIDITY_WEAK")
+
+    # 7. TREND STRUCTURE
+    if chg_24h > 10 and chg_6h > 3 and chg_1h > 0:
+        fow_score += 10
+        signals.append("🚀 Strong uptrend — Momentum confirmed")
+        smc_patterns.append("UPTREND_STRONG")
+    elif chg_24h < -10 and chg_6h < -3 and chg_1h < 0:
+        fow_score -= 10
+        signals.append("📉 Downtrend confirmed — Avoid entry")
+        smc_patterns.append("DOWNTREND_STRONG")
+
+    fow_score = max(0, min(100, fow_score))
+
+    # SIGNAL DETERMINATION
+    if fow_score >= 75:
+        signal = "STRONG BUY"
+        signal_color = "green"
+        confidence = "HIGH"
+    elif fow_score >= 60:
+        signal = "BUY"
+        signal_color = "green"
+        confidence = "MEDIUM"
+    elif fow_score >= 45:
+        signal = "NEUTRAL"
+        signal_color = "yellow"
+        confidence = "LOW"
+    elif fow_score >= 30:
+        signal = "SELL"
+        signal_color = "red"
+        confidence = "MEDIUM"
+    else:
+        signal = "STRONG SELL"
+        signal_color = "red"
+        confidence = "HIGH"
+
+    # ENTRY, SL, TP calculation
+    entry_zone = price
+    if signal in ["STRONG BUY", "BUY"]:
+        stop_loss = round(price * 0.95, 8)
+        tp1 = round(price * 1.05, 8)
+        tp2 = round(price * 1.12, 8)
+        tp3 = round(price * 1.20, 8)
+    else:
+        stop_loss = round(price * 1.05, 8)
+        tp1 = round(price * 0.95, 8)
+        tp2 = round(price * 0.88, 8)
+        tp3 = round(price * 0.80, 8)
+
+    return {
+        "symbol": sym,
+        "price": price,
+        "fow_score": fow_score,
+        "signal": signal,
+        "signal_color": signal_color,
+        "confidence": confidence,
+        "smc_patterns": smc_patterns[:5],
+        "signals": signals[:5],
+        "entry_zone": entry_zone,
+        "stop_loss": stop_loss,
+        "tp1": tp1,
+        "tp2": tp2,
+        "tp3": tp3,
+        "whale_buy_ratio": round(whale_buy_ratio * 100),
+        "volume_ratio": round(vol_ratio, 2),
+        "buy_pressure": round(buy_pressure_1h * 100),
+        "liquidity": liq,
+        "change_24h": chg_24h,
+        "change_1h": chg_1h,
+    }
 async def preload():
     print("⚡ Preloading all data...")
     await asyncio.gather(
@@ -580,6 +751,53 @@ async def get_analytics():
         "top_symbols": [{"symbol": s, "buys": d["buys"], "sells": d["sells"]} for s,d in top_symbols],
         "chain_distribution": chain_dist,
         "recent_whales": all_whales[:10],
+    }
+@app.get("/api/coin-signals")
+async def get_coin_signals():
+    """FOW Analysis for all major coins"""
+    all_pairs = []
+    
+    # Collect pairs from all cached sources
+    for key in ["pairs_eth", "pairs_meme", "pairs_sol", "pairs_bnb", "pairs_base", "pairs_arb"]:
+        pairs = cache.get(key, {}).get("pairs", [])
+        all_pairs.extend(pairs[:5])
+    
+    whales = cache["whales"].get("whales", [])
+    
+    signals = []
+    seen = set()
+    
+    for pair in all_pairs:
+        sym = pair.get("baseToken", {}).get("symbol", "")
+        if not sym or sym in seen:
+            continue
+        seen.add(sym)
+        
+        price = float(pair.get("priceUsd", 0) or 0)
+        liq = float(pair.get("liquidity", {}).get("usd", 0) or 0)
+        vol = float(pair.get("volume", {}).get("h24", 0) or 0)
+        
+        # Skip very low quality pairs
+        if price <= 0 or liq < 1000 or vol < 1000:
+            continue
+        
+        analysis = calculate_fow_analysis(pair, whales)
+        signals.append({
+            **analysis,
+            "chain": pair.get("chainId", "unknown"),
+            "dex_url": pair.get("url", "#"),
+            "pair_address": pair.get("pairAddress", ""),
+        })
+    
+    # Sort by FOW score
+    signals.sort(key=lambda x: x["fow_score"], reverse=True)
+    
+    return {
+        "signals": signals,
+        "total": len(signals),
+        "bullish": sum(1 for s in signals if s["signal"] in ["BUY", "STRONG BUY"]),
+        "bearish": sum(1 for s in signals if s["signal"] in ["SELL", "STRONG SELL"]),
+        "neutral": sum(1 for s in signals if s["signal"] == "NEUTRAL"),
     }
 @app.get("/api/analyze/{address}")
 async def analyze_contract(address: str):
