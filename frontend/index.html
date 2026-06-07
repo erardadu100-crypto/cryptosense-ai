@@ -1046,7 +1046,7 @@ async function loadCoinSignals(){
       '<div class="stat-card"><span class="stat-icon">🎯</span><div class="stat-label">Total Analyzed</div><div class="stat-value" style="color:var(--accent)">'+(d.total||0)+'</div><div class="stat-change up">FOW Active</div></div>'+
       '<div class="stat-card"><span class="stat-icon">🚀</span><div class="stat-label">Bullish Signals</div><div class="stat-value" style="color:var(--green)">'+(d.bullish||0)+'</div><div class="stat-change up">▲ Buy Zone</div></div>'+
       '<div class="stat-card"><span class="stat-icon">🔴</span><div class="stat-label">Bearish Signals</div><div class="stat-value" style="color:var(--red)">'+(d.bearish||0)+'</div><div class="stat-change dn">▼ Sell Zone</div></div>'+
-      '<div class="stat-card"><span class="stat-icon">⚖️</span><div class="stat-label">Market Bias</div><div class="stat-value" style="color:'+(d.bullish>d.bearish?'var(--green)':'var(--red))+'">'+(d.bullish>d.bearish?'BULLISH':'BEARISH')+'</div><div class="stat-change" style="color:var(--muted)">SMC Analysis</div></div>';
+      '<div class="stat-card"><span class="stat-icon">⚖️</span><div class="stat-label">Market Bias</div><div class="stat-value" style="color:'+(d.bullish>d.bearish?'var(--green)':'var(--red)')+'">'+
   }
 
   filterSignals(currentSignalFilter);
